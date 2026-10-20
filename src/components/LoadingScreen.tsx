@@ -89,22 +89,15 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
       const t = setTimeout(() => setTyped(TAGLINE.length + TRAIL), 0);
       return () => clearTimeout(t);
     }
-    let iv = 0;
-    const start = setTimeout(() => {
-      iv = window.setInterval(() => {
-        setTyped((n) => {
-          if (n >= TAGLINE.length + TRAIL) {
-            clearInterval(iv);
-            return n;
-          }
-          return n + 1;
-        });
-      }, TYPE_STEP_MS);
-    }, TYPE_START_MS);
-    return () => {
-      clearTimeout(start);
-      clearInterval(iv);
-    };
+    // Clock-driven so typing never lags the progress bar on a busy main thread.
+    const t0 = performance.now();
+    const total = TAGLINE.length + TRAIL;
+    const iv = window.setInterval(() => {
+      const n = Math.max(0, Math.min(total, Math.floor((performance.now() - t0 - TYPE_START_MS) / TYPE_STEP_MS)));
+      setTyped(n);
+      if (n >= total) clearInterval(iv);
+    }, 16);
+    return () => clearInterval(iv);
   }, [reduce]);
 
   // Displayed progress follows real loading but is paced by the clock (ease-out over MIN_MS),

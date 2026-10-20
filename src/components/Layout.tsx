@@ -162,7 +162,7 @@ function Nav() {
         aria-label="Main"
         className={cx(
           "transition-[background-color,border-color] duration-300",
-          scrolled || open ? "glass border-b border-line" : "border-b border-transparent bg-transparent",
+          open ? "border-b border-line bg-[#050506]" : scrolled ? "glass border-b border-line" : "border-b border-transparent bg-transparent",
         )}
       >
         <div className="container-x flex h-14 items-center justify-between gap-4 md:h-16">
@@ -206,7 +206,7 @@ function Nav() {
         {open && (
           <motion.div
             id="mobile-menu"
-            className="glass fixed inset-x-0 bottom-0 top-14 z-40 overflow-y-auto lg:hidden"
+            className="fixed inset-x-0 bottom-0 top-14 z-40 overflow-y-auto bg-[#050506] lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

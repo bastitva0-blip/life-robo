@@ -141,7 +141,7 @@ export default function Shell({ onLogout }: { onLogout: () => void }) {
 
       {/* Mobile drawer */}
       <div className={cx("fixed inset-0 z-50 lg:hidden", open ? "" : "pointer-events-none")} aria-hidden={!open}>
-        <div className={cx("absolute inset-0 bg-black/60 transition-opacity", open ? "opacity-100" : "opacity-0")} onClick={() => setOpen(false)} />
+        <div className={cx("absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity", open ? "opacity-100" : "opacity-0")} onClick={() => setOpen(false)} />
         <div
           id="admin-drawer"
           ref={drawerRef}

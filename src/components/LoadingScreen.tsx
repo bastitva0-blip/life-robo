@@ -3,11 +3,11 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { preloadSite } from "@/lib/site";
 
 const KEY = "lr-intro-seen";
-const HARD_CAP_MS = 2500;
-const MIN_MS = 1650; // long enough for type-on + logo reveal to read
+const HARD_CAP_MS = 5500;
+const MIN_MS = 3400; // full type-on + logo reveal + bar sweep, even when everything is cached
 const TAGLINE = "INNOVATE. BUILD. COMPETE.";
-const TYPE_START_MS = 150;
-const TYPE_STEP_MS = 30;
+const TYPE_START_MS = 350;
+const TYPE_STEP_MS = 75;
 const TRAIL = 4;
 // Dev aid: /?introhold keeps the loader on screen for design review.
 const HOLD = import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("introhold"); // trailing characters that are still "cooling" from dim to cyan
@@ -76,7 +76,7 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
     Promise.race([Promise.all([site, fonts, minWait]), cap]).then(() => {
       if (!alive) return;
       setTarget(100);
-      if (!HOLD) setTimeout(() => alive && setExiting(true), 320); // let the bar visibly reach the end
+      if (!HOLD) setTimeout(() => alive && setExiting(true), 650); // let the bar visibly reach the end and settle
     });
     return () => {
       alive = false;
@@ -107,19 +107,25 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
     };
   }, [reduce]);
 
-  // Ease the displayed progress toward the target.
+  // Displayed progress follows real loading but is paced by the clock (ease-out over MIN_MS),
+  // so a fast, cached load still shows a smooth sweep instead of jumping to 100.
+  const startRef = useRef(0);
   useEffect(() => {
+    if (!startRef.current) startRef.current = performance.now();
     let raf = 0;
     const tick = () => {
+      const t = Math.min(1, (performance.now() - startRef.current) / (reduce ? 400 : MIN_MS));
+      const clock = (1 - Math.pow(1 - t, 2.2)) * 100;
+      const goal = Math.min(target, clock);
       const cur = shownRef.current;
-      const next = cur + (target - cur) * 0.14;
-      shownRef.current = Math.abs(target - next) < 0.4 ? target : next;
+      const next = cur + (goal - cur) * 0.12;
+      shownRef.current = Math.abs(goal - next) < 0.3 ? goal : next;
       setShown(shownRef.current);
-      if (shownRef.current !== target) raf = requestAnimationFrame(tick);
+      if (shownRef.current < 100) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target]);
+  }, [target, reduce]);
 
   // Esc skips; lock scroll while visible; drop the pre-paint boot layer.
   useEffect(() => {

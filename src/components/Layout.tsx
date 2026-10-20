@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { SocialLinks } from "@shared/types";
 import { useSite } from "@/lib/site";
 import { DEFAULT_SETTINGS } from "@/lib/defaults";
-import { cx, isExternal, safeHref } from "@/lib/format";
+import { cx, fmtDate, isExternal, safeHref } from "@/lib/format";
 import { Badge, Wordmark } from "./Brand";
 import { ArrowRight, ArrowUpRight, Close, GitHub, Instagram, LinkedIn, Mail, Menu, XLogo, YouTube } from "./icons";
 import { SmartLink } from "./ui";
@@ -31,9 +31,10 @@ interface StripData {
   tone: "info" | "highlight" | "urgent";
 }
 
+// Dismissal lasts for the current visit only, so returning visitors always see the latest strip.
 function readDismissed(key: string) {
   try {
-    return !!localStorage.getItem(key);
+    return !!sessionStorage.getItem(key);
   } catch {
     return false;
   }
@@ -61,6 +62,16 @@ function TopStrip() {
       image: a.image,
       tone: a.tone,
     };
+  } else if (data?.upcomingEvents?.length) {
+    const ev = data.upcomingEvents[0];
+    strip = {
+      key: `lr-strip-event-${ev.id}-${ev.updatedAt}`,
+      message: `Upcoming: ${ev.title} — ${fmtDate(ev.startsAt, { day: "numeric", month: "short" })}. Register now.`,
+      href: `/events/${ev.slug}`,
+      label: "See details",
+      image: ev.cover,
+      tone: "highlight",
+    };
   } else if (data && settings.joinOpen) {
     strip = {
       key: "lr-strip-join-default",
@@ -75,7 +86,7 @@ function TopStrip() {
 
   const dismiss = () => {
     try {
-      localStorage.setItem(strip.key, "1");
+      sessionStorage.setItem(strip.key, "1");
     } catch {
       /* ignore */
     }

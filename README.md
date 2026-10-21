@@ -164,7 +164,7 @@ The seed content comes from the old site and the event posters. The following it
 - **Registration links.** Events have no `registerUrl`. The posters used QR codes, so add the form URLs where relevant.
 - **Gallery captions and alt text** are generic ("Robotics workshop"). Replace them with specific descriptions.
 - **Blog.** Seed posts are short recaps based only on poster facts. Replace or extend them.
-- **Collaborations (migration 0004).** The IEEE SB and IEEE RAS descriptions are written from their banners. Ask both groups to approve the wording. The Vortex LinkedIn URL (`linkedin.com/company/vortex-life-robo`) is guessed from the poster handle `@vortex-life-robo`. **Vortex Workshop 1** ("Robotics: Who am I?", Dr. Manoj Kumar Jain) is not seeded as an event because its date is unknown. Add it under Events with Series `vortex`. Its photos (`/photos/vortex/vortex-06` to `-12`) are already in the series gallery. Certificate signatories are empty until someone adds them in Site content.
+- **Collaborations (migration 0004).** The IEEE SB and IEEE RAS descriptions are written from their banners. Ask both groups to approve the wording. The Vortex LinkedIn URL (`linkedin.com/company/vortex-life-robo`) is guessed from the poster handle `@vortex-life-robo`. Vortex Workshop 1 (3 Oct 2026, migration 0005) uses the same 1:40 PM slot and a generic FoET venue, because the poster gives neither. Correct them in admin if they differ. Certificate signatories are empty until someone adds them in Site content.
 
 ---
 

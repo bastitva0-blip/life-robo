@@ -72,13 +72,15 @@ function newCode() {
 
 const origin = (c: Context<AppEnv>) => new URL(c.req.url).origin;
 
-const optionalEmail = z.union([z.literal(""), z.email("Please enter a valid email").max(200)]).default("");
-const phone = z
+// Base shapes without defaults: on updates a default would overwrite fields the client didn't send.
+const emailOrEmpty = z.union([z.literal(""), z.email("Please enter a valid email").max(200)]);
+const phoneBase = z
   .string()
   .trim()
   .max(20)
-  .regex(/^[0-9+\-\s()]*$/, "Digits only")
-  .default("");
+  .regex(/^[0-9+\-\s()]*$/, "Digits only");
+const optionalEmail = emailOrEmpty.default("");
+const phone = phoneBase.default("");
 
 /* ---------- Public: register for an event ---------- */
 
@@ -368,8 +370,8 @@ const regId = (c: Context<AppEnv>) => {
 
 const updateSchema = z.object({
   name: z.string().trim().min(1, "Required").max(120).optional(),
-  email: optionalEmail.optional(),
-  phone: phone.optional(),
+  email: emailOrEmpty.optional(),
+  phone: phoneBase.optional(),
   course: z.string().trim().max(120).optional(),
   attended: z.boolean().optional(),
 });

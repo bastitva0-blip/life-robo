@@ -48,6 +48,21 @@ export const settingsSchema = z.object({
   seoTitle: text(120),
   seoDescription: text(300),
   ogImage: urlish,
+  collabHeading: text(160),
+  collabIntro: text(1000),
+  collabGoals: z.array(z.object({ title: text(80), description: text(300) })).max(8),
+  seriesName: text(60),
+  seriesTagline: text(120),
+  seriesBody: text(3000),
+  seriesKey: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(40)
+    .regex(/^[a-z0-9-]*$/, "Use lowercase letters, numbers and dashes"),
+  seriesImages: z.array(urlish).max(40),
+  seriesLinks: z.array(z.object({ label: text(60), url: urlish })).max(6),
+  certSignatories: z.array(z.object({ name: text(80), title: text(120) })).max(3),
 });
 
 // Fallbacks so the site still renders if a key is missing from D1.
@@ -81,6 +96,16 @@ export const defaultSettings: Settings = {
   seoTitle: "Life Robo — Robotics Club",
   seoDescription: "",
   ogImage: "/brand/og-default.jpg",
+  collabHeading: "Collaborations",
+  collabIntro: "",
+  collabGoals: [],
+  seriesName: "",
+  seriesTagline: "",
+  seriesBody: "",
+  seriesKey: "",
+  seriesImages: [],
+  seriesLinks: [],
+  certSignatories: [],
 };
 
 export async function loadSettings(db: D1Database): Promise<Settings> {

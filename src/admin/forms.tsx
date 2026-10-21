@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { Alert, ClubEvent, GalleryImage, Post, Project, TeamMember } from "@shared/types";
+import type { Alert, ClubEvent, GalleryImage, Partner, Post, Project, TeamMember } from "@shared/types";
 import type { FormProps } from "./Collection";
 import { AlertStrip } from "./AlertPreview";
 import { ImagePicker, MultiImageField } from "./ImagePicker";
@@ -127,14 +127,36 @@ export function EventForm({ draft, set, errors, isNew }: FormProps<ClubEvent>) {
             hint="One or two lines shown on event cards."
           />
           <TextField
-            label="Registration link"
-            value={draft.registerUrl}
-            onChange={(v) => set({ registerUrl: v })}
-            error={errors.registerUrl}
-            placeholder="https://forms.gle/…"
+            label="Series"
+            value={draft.series}
+            onChange={(v) => set({ series: v.toLowerCase().replace(/\s+/g, "-") })}
+            error={errors.series}
+            placeholder="vortex"
+            hint="Events with the same series are listed together. Use the series key from Site content (e.g. vortex) to show it on the Collaborations page."
             optional
-            inputMode="url"
+            spellCheck={false}
+            autoCapitalize="off"
+            maxLength={40}
           />
+        </Group>
+        <Group title="Registration">
+          <Toggle
+            label="Register on this site"
+            description="Show a registration form on the event page. People get a confirmation email, and you take attendance under Attendance."
+            checked={draft.registrationOpen}
+            onChange={(v) => set({ registrationOpen: v })}
+          />
+          {!draft.registrationOpen && (
+            <TextField
+              label="External registration link"
+              value={draft.registerUrl}
+              onChange={(v) => set({ registerUrl: v })}
+              error={errors.registerUrl}
+              placeholder="https://forms.gle/…"
+              optional
+              inputMode="url"
+            />
+          )}
         </Group>
         <Group title="Write-up">
           <MarkdownField label="Body" value={draft.body} onChange={(v) => set({ body: v })} error={errors.body} />
@@ -448,6 +470,66 @@ export function AlertForm({ draft, set, errors }: FormProps<Alert>) {
             <DateTimeField label="Hide after" value={draft.endsAt} onChange={(v) => set({ endsAt: v })} error={errors.endsAt} nullable />
           </Group>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Partners ---------- */
+
+export function PartnerForm({ draft, set, errors }: FormProps<Partner>) {
+  return (
+    <div className={twoCol}>
+      <div className="flex min-w-0 flex-col gap-6">
+        <Group title="Partner">
+          <TextField label="Name" value={draft.name} onChange={(v) => set({ name: v })} error={errors.name} required maxLength={160} />
+          <TextField
+            label="Short name"
+            value={draft.shortName}
+            onChange={(v) => set({ shortName: v })}
+            error={errors.shortName}
+            placeholder="IEEE RAS"
+            optional
+            maxLength={60}
+          />
+          <TextArea
+            label="Summary"
+            value={draft.summary}
+            onChange={(v) => set({ summary: v })}
+            error={errors.summary}
+            rows={3}
+            maxLength={600}
+            hint="Who they are, in one or two lines."
+          />
+          <TextArea
+            label="How we work together"
+            value={draft.body}
+            onChange={(v) => set({ body: v })}
+            error={errors.body}
+            rows={5}
+            maxLength={3000}
+            optional
+          />
+        </Group>
+        <Group title="Links" description="Full URLs. Leave empty to hide.">
+          <TextField label="Website" value={draft.website} onChange={(v) => set({ website: v })} error={errors.website} inputMode="url" optional />
+          <TextField label="Instagram" value={draft.instagram} onChange={(v) => set({ instagram: v })} error={errors.instagram} inputMode="url" optional />
+          <TextField label="LinkedIn" value={draft.linkedin} onChange={(v) => set({ linkedin: v })} error={errors.linkedin} inputMode="url" optional />
+        </Group>
+      </div>
+      <div className="flex min-w-0 flex-col gap-6">
+        <Group title="Visibility">
+          <Toggle label="Active" description="Show on the Collaborations page." checked={draft.active} onChange={(v) => set({ active: v })} />
+          <Toggle
+            label="On certificates"
+            description="Print this logo and name on event certificates."
+            checked={draft.onCertificate}
+            onChange={(v) => set({ onCertificate: v })}
+          />
+        </Group>
+        <Group title="Logo">
+          <ImagePicker label="Logo" value={draft.logo} onChange={(v) => set({ logo: v })} error={errors.logo} aspect="1/1" hint="Square works best. Shown on a white tile." />
+        </Group>
       </div>
     </div>
   );

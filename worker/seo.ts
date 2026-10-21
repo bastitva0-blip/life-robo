@@ -18,6 +18,10 @@ const STATIC_ROUTES: Record<string, { title: string; description?: string }> = {
   "/team": { title: "Team", description: "The students and mentors behind Life Robo." },
   "/gallery": { title: "Gallery", description: "Moments from Life Robo workshops, lectures and builds." },
   "/blog": { title: "Blog", description: "Notes and highlights from Life Robo sessions." },
+  "/collaborations": {
+    title: "Collaborations",
+    description: "Life Robo works with the IEEE Student Branch, FoET and IEEE Robotics and Automation Society on the Vortex workshop series and more.",
+  },
   "/join": { title: "Join", description: "Sign up to build robots with Life Robo." },
   "/contact": { title: "Contact", description: "Get in touch with Life Robo." },
 };
@@ -67,6 +71,11 @@ export async function resolveMeta(db: D1Database, path: string, settings: Settin
       };
     }
     return meta;
+  }
+
+  // Certificates are personal: render them, but keep them out of search results.
+  if (/^\/certificates\/[A-Za-z0-9-]{1,20}$/.test(p)) {
+    return { ...base, title: `Certificate${suffix}`, description: `Certificate of participation issued by ${settings.shortName}.`, noindex: true };
   }
 
   const m = p.match(/^\/(events|projects|blog)\/([a-z0-9-]+)$/);

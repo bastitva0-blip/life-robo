@@ -2,6 +2,7 @@ import { Hono, type Context } from "hono";
 import { z } from "zod";
 import type { Signup } from "@shared/types";
 import type { AppEnv } from "./env";
+import { attendance } from "./attendance";
 import { clearSession, hashIp, issueSession, requireAdmin, safeEqual, sameOrigin } from "./auth";
 import {
   getEvent,
@@ -60,7 +61,8 @@ app.get("/api/site", async (c) => {
 
 app.get("/api/events", async (c) => {
   c.header("Cache-Control", PUBLIC_CACHE);
-  return c.json({ items: await listEvents(c.env.DB, c.req.query("status")) });
+  const series = c.req.query("series")?.toLowerCase();
+  return c.json({ items: await listEvents(c.env.DB, c.req.query("status"), series && /^[a-z0-9-]{1,40}$/.test(series) ? series : undefined) });
 });
 
 app.get("/api/events/:slug", async (c) => {
@@ -182,6 +184,9 @@ app.use("/api/admin/*", async (c, next) => {
 });
 
 app.get("/api/admin/me", (c) => c.json({ ok: true }));
+
+// Event registration, certificates (public) and attendance (admin). Must stay above the generic CRUD routes.
+app.route("/", attendance);
 
 // ---------- API: admin settings ----------
 

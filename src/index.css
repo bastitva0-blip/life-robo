@@ -308,3 +308,31 @@
   background-clip: text;
   color: transparent;
 }
+
+/* Certificates: one A4 landscape page, no browser margins, colours kept. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .cert-wrap {
+    width: 297mm !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  .cert-sheet {
+    width: 297mm;
+    height: 210mm;
+    aspect-ratio: auto;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

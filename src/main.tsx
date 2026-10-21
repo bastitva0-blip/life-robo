@@ -40,6 +40,13 @@ const router = createBrowserRouter([
     HydrateFallback: Blank,
   },
   {
+    // Outside SiteLayout: no nav or footer, so it prints as a single clean page.
+    path: "/certificates/:code",
+    lazy: page(() => import("@/pages/Certificate")),
+    errorElement: <RootError />,
+    HydrateFallback: Blank,
+  },
+  {
     path: "/",
     Component: SiteLayout,
     errorElement: <RootError />,
@@ -51,6 +58,7 @@ const router = createBrowserRouter([
       { path: "projects", lazy: page(() => import("@/pages/Projects")) },
       { path: "projects/:slug", lazy: page(() => import("@/pages/ProjectDetail")) },
       { path: "team", lazy: page(() => import("@/pages/Team")) },
+      { path: "collaborations", lazy: page(() => import("@/pages/Collaborations")) },
       { path: "gallery", lazy: page(() => import("@/pages/Gallery")) },
       { path: "blog", lazy: page(() => import("@/pages/Blog")) },
       { path: "blog/:slug", lazy: page(() => import("@/pages/PostDetail")) },

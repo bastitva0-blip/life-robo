@@ -61,6 +61,14 @@ const eventSchema = z.object({
   coverAlt: text(300).default(""),
   images: z.array(urlish).max(60).default([]),
   registerUrl: urlish.default(""),
+  series: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(40)
+    .regex(/^[a-z0-9-]*$/, "Use lowercase letters, numbers and dashes")
+    .default(""),
+  registrationOpen: z.boolean().default(false),
   featured: z.boolean().default(false),
   published: z.boolean().default(true),
 });
@@ -114,6 +122,20 @@ const postSchema = z.object({
   published: z.boolean().default(true),
 });
 
+const partnerSchema = z.object({
+  name: required(160),
+  shortName: text(60).default(""),
+  logo: urlish.default(""),
+  summary: text(600).default(""),
+  body: text(3000).default(""),
+  website: urlish.default(""),
+  instagram: urlish.default(""),
+  linkedin: urlish.default(""),
+  onCertificate: z.boolean().default(true),
+  active: z.boolean().default(true),
+  sort: z.number().int().default(0),
+});
+
 const alertSchema = z.object({
   message: required(400),
   linkUrl: urlish.default(""),
@@ -146,6 +168,8 @@ export const tables: Record<AdminTable, TableDef> = {
       c("coverAlt", "text"),
       c("images", "json"),
       c("registerUrl", "text"),
+      c("series", "text"),
+      c("registrationOpen", "bool"),
       c("featured", "bool"),
       c("published", "bool"),
     ],
@@ -225,6 +249,27 @@ export const tables: Record<AdminTable, TableDef> = {
       c("body", "text"),
       c("author", "text"),
       c("published", "bool"),
+    ],
+  },
+  partners: {
+    name: "partners",
+    sql: "partners",
+    schema: partnerSchema,
+    orderBy: "sort ASC, id ASC",
+    sortable: true,
+    hasSlug: false,
+    columns: [
+      c("name", "text"),
+      c("shortName", "text"),
+      c("logo", "text"),
+      c("summary", "text"),
+      c("body", "text"),
+      c("website", "text"),
+      c("instagram", "text"),
+      c("linkedin", "text"),
+      c("onCertificate", "bool"),
+      c("active", "bool"),
+      c("sort", "int"),
     ],
   },
   alerts: {

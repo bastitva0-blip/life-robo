@@ -19,6 +19,8 @@ const SECTIONS: { to: string; label: string; color: string; icon: ReactNode; end
   { to: "/admin/team", label: "Team", color: "#5e5ce6", icon: <I d={<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6" /></>} /> },
   { to: "/admin/gallery", label: "Gallery", color: "#bf5af2", icon: <I d={<><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 16-5-5-9 9" /></>} /> },
   { to: "/admin/blog", label: "Blog", color: "#64d2ff", icon: <I d={<><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>} /> },
+  { to: "/admin/attendance", label: "Attendance", color: "#34c759", icon: <I d={<><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></>} /> },
+  { to: "/admin/partners", label: "Partners", color: "#ff9500", icon: <I d={<><path d="M8 12h8" /><path d="M9 7H7a5 5 0 0 0 0 10h2" /><path d="M15 7h2a5 5 0 0 1 0 10h-2" /></>} /> },
   { to: "/admin/signups", label: "Signups", color: "#ff375f", icon: <I d={<><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z" /></>} /> },
   { to: "/admin/media", label: "Media library", color: "#ac8e68", icon: <I d={<><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></>} /> },
 ];

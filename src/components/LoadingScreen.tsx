@@ -16,6 +16,7 @@ const HOLD = import.meta.env.DEV && typeof window !== "undefined" && new URLSear
 export function shouldShowIntro() {
   if (typeof window === "undefined") return false;
   if (window.location.pathname.startsWith("/admin")) return false;
+  if (window.location.pathname.startsWith("/certificates/")) return false; // straight to the certificate from the email link
   if (HOLD) return true;
   try {
     return sessionStorage.getItem(KEY) !== "1";
@@ -185,9 +186,9 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
               <img
                 src="/brand/logo-badge.png"
                 alt=""
-                width={96}
-                height={96}
-                className="h-14 w-14 rounded-full shadow-[0_0_40px_rgb(59_130_246/0.35)] sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+                width={176}
+                height={176}
+                className="h-28 w-28 rounded-full shadow-[0_0_60px_rgb(59_130_246/0.4)] sm:h-36 sm:w-36 lg:h-44 lg:w-44"
               />
               <p
                 className="wordmark-gradient font-semibold leading-none"

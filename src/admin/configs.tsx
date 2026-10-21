@@ -1,9 +1,9 @@
-import type { Alert, ClubEvent, GalleryImage, Post, Project, TeamMember } from "@shared/types";
+import type { Alert, ClubEvent, GalleryImage, Partner, Post, Project, TeamMember } from "@shared/types";
 import { fmtDate, fmtTime } from "@/lib/format";
 import type { CollectionConfig } from "./Collection";
 import { AlertsLiveNow } from "./AlertPreview";
 import { GalleryBulk } from "./GalleryBulk";
-import { AlertForm, EventForm, GalleryForm, PostForm, ProjectForm, TeamForm } from "./forms";
+import { AlertForm, EventForm, GalleryForm, PartnerForm, PostForm, ProjectForm, TeamForm } from "./forms";
 import { Badge } from "./ui";
 import { alertState, nowIso, slugError } from "./utils";
 
@@ -44,6 +44,8 @@ export const eventsConfig: CollectionConfig<ClubEvent> = {
     coverAlt: "",
     images: [],
     registerUrl: "",
+    series: "",
+    registrationOpen: false,
     featured: false,
     published: true,
   }),
@@ -54,6 +56,8 @@ export const eventsConfig: CollectionConfig<ClubEvent> = {
       <Badge tone={i.status === "upcoming" ? "green" : "neutral"}>{i.status === "upcoming" ? "Upcoming" : "Past"}</Badge>
       {pub(i.published)}
       {feat(i.featured)}
+      {i.registrationOpen && <Badge tone="blue">Registration</Badge>}
+      {i.series && <Badge>{i.series}</Badge>}
     </>
   ),
   meta: (i) => (
@@ -268,4 +272,40 @@ export const alertsConfig: CollectionConfig<Alert> = {
   Form: AlertForm,
   ListTop: AlertsLiveNow,
   emptyBody: "Create an alert to promote an event or a sign-up drive across the whole site.",
+};
+
+export const partnersConfig: CollectionConfig<Partner> = {
+  table: "partners",
+  base: "/admin/partners",
+  title: "Partners",
+  singular: "partner",
+  subtitle: "Organisations on the Collaborations page. Partners marked On certificates also appear on event certificates.",
+  sortable: true,
+  blank: () => ({
+    name: "",
+    shortName: "",
+    logo: "",
+    summary: "",
+    body: "",
+    website: "",
+    instagram: "",
+    linkedin: "",
+    onCertificate: true,
+    active: true,
+    sort: 0,
+  }),
+  label: (d) => d.name,
+  thumb: (i) => i.logo,
+  badges: (i) => (
+    <>
+      {i.onCertificate && <Badge tone="blue">On certificates</Badge>}
+      {!i.active && <Badge tone="amber">Hidden</Badge>}
+    </>
+  ),
+  meta: (i) => <span>{i.shortName}</span>,
+  search: (i) => `${i.name} ${i.shortName}`,
+  quickToggle: { key: "active", label: "Active" },
+  validate: (d): Record<string, string> => (d.name.trim() ? {} : { name: "Required" }),
+  viewUrl: () => "/collaborations",
+  Form: PartnerForm,
 };

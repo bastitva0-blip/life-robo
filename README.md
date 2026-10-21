@@ -110,6 +110,23 @@ Later deploys need only `npm run deploy`. When you add a new SQL file to `migrat
 
 ---
 
+## Event registration, attendance and certificates
+
+1. In **Events**, open an event and turn on **Register on this site**. Its page then shows a form. Each registrant gets a confirmation email.
+2. On the day, open **Attendance → the event** on a phone. Tap people in as they arrive. People who registered can also be found by typing their email into the walk-in form, and anyone who just shows up gets added there.
+3. After the event, press **Send certificates**. Everyone marked present who has an email gets a link to `/certificates/<ID>`. That page shows an A4 certificate with the club logo, partner logos, name, event and date. **Download PDF** opens the browser's print dialog, where they choose Save as PDF. Anyone can verify a certificate by its ID.
+
+**Email without a domain.** Mail goes out from the club's Gmail through a small Google Apps Script web app (`scripts/gmail-mailer.gs`). It's free and needs no domain or card. Gmail allows about 100 emails a day, so certificates go out 50 per click and the admin shows how many are left today. To set it up, follow the steps at the top of `scripts/gmail-mailer.gs`, then:
+
+```bash
+npx wrangler secret put MAIL_SCRIPT_URL      # the web app URL ending in /exec
+npx wrangler secret put MAIL_SCRIPT_SECRET   # same value as SECRET in the script
+```
+
+Without these secrets everything still works. Emails are skipped, and certificate links can be copied from the Attendance page.
+
+---
+
 ## Using the admin panel
 
 Go to `/admin` and sign in with `ADMIN_PASSWORD`. The session is an HMAC-signed, HttpOnly, Secure, `SameSite=Strict` cookie that lasts 7 days. Mutating requests also have their `Origin` header checked.
@@ -121,6 +138,8 @@ Go to `/admin` and sign in with `ADMIN_PASSWORD`. The session is an HMAC-signed,
 | **Site settings** | Every piece of home copy (hero, about, vision and mission, stats, tracks, process steps, Robo-facts), socials, important links, contact email, address, join-form toggle, SEO defaults, and the **logo** |
 | **Events / Projects / Team / Gallery / Blog** | List, create, edit, reorder, toggle featured, published, or active, and delete (with confirmation). Body fields are Markdown with a preview. |
 | **Signups** | Join-form submissions, with CSV export |
+| **Partners** | Organisations shown on `/collaborations` (IEEE SB FoET LU, IEEE RAS). Partners marked *On certificates* print their logo and name on certificates. The page copy, the workshop series (Vortex) and certificate signatories are under **Site content**. |
+| **Attendance** | Per event: check people in at the door, add walk-ins, export CSV, and email certificates. Turn on *Register on this site* in an event to show a registration form on its page. |
 
 Every image field has an upload button. Accepted formats are JPEG, PNG, WebP, GIF, and AVIF. Images are compressed in the browser and stored in D1, up to 5 MB each. Each image also has a separate alt text field; please fill it in for accessibility.
 
@@ -145,6 +164,7 @@ The seed content comes from the old site and the event posters. The following it
 - **Registration links.** Events have no `registerUrl`. The posters used QR codes, so add the form URLs where relevant.
 - **Gallery captions and alt text** are generic ("Robotics workshop"). Replace them with specific descriptions.
 - **Blog.** Seed posts are short recaps based only on poster facts. Replace or extend them.
+- **Collaborations (migration 0004).** The IEEE SB and IEEE RAS descriptions are written from their banners. Ask both groups to approve the wording. The Vortex LinkedIn URL (`linkedin.com/company/vortex-life-robo`) is guessed from the poster handle `@vortex-life-robo`. **Vortex Workshop 1** ("Robotics: Who am I?", Dr. Manoj Kumar Jain) is not seeded as an event because its date is unknown. Add it under Events with Series `vortex`. Its photos (`/photos/vortex/vortex-06` to `-12`) are already in the series gallery. Certificate signatories are empty until someone adds them in Site content.
 
 ---
 

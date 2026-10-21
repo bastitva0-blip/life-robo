@@ -7,6 +7,7 @@ import { ArrowUpRight, Calendar, Clock, Pin } from "@/components/icons";
 import { ErrorState, Img, Reveal, SmartLink } from "@/components/ui";
 import NotFound from "./NotFound";
 import { BackLink, DetailShell, DetailSkeleton, ImageGrid, Markdown, is404 } from "./_shared";
+import { RegisterForm } from "./_RegisterForm";
 
 export default function EventDetail() {
   const { slug = "" } = useParams();
@@ -57,7 +58,11 @@ export default function EventDetail() {
                 )}
               </ul>
               {event.summary && <p className="mt-8 text-lg text-fg/90 md:text-xl">{event.summary}</p>}
-              {safeHref(event.registerUrl) && (
+              {event.registrationOpen && event.status === "upcoming" ? (
+                <div className="mt-8" id="register">
+                  <RegisterForm event={event} />
+                </div>
+              ) : safeHref(event.registerUrl) && (
                 <div className="mt-8">
                   <SmartLink href={event.registerUrl} className="btn btn-primary">
                     Register now <ArrowUpRight size={18} />

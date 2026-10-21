@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Settings, SocialLinks } from "@shared/types";
 import { ApiError, adminApi, errorMessage, fieldErrors } from "./adminApi";
 import { useAdminData } from "./hooks";
-import { ImagePicker } from "./ImagePicker";
+import { ImagePicker, MultiImageField } from "./ImagePicker";
 import { toast } from "./toast";
 import { ErrorSummary, Grid, Group, ListEditor, LoadError, PageHeader, SaveBar, TextArea, TextField, Toggle, UnsavedGuard } from "./ui";
 import { SAVED_MESSAGE, stableJson } from "./utils";
@@ -19,6 +19,8 @@ const SECTIONS = [
   ["socials", "Socials"],
   ["contact", "Contact"],
   ["join", "Join"],
+  ["collab", "Collaborations"],
+  ["certs", "Certificates"],
   ["seo", "SEO"],
 ] as const;
 
@@ -331,6 +333,112 @@ function SettingsEditor({ initial }: { initial: Settings }) {
             />
             <TextField label="Heading" value={draft.joinHeading} onChange={(v) => set("joinHeading", v)} error={err("joinHeading")} maxLength={120} />
             <TextArea label="Body" value={draft.joinBody} onChange={(v) => set("joinBody", v)} error={err("joinBody")} rows={4} maxLength={1000} />
+          </Group>
+        </div>
+
+        <div
+          id="s-collab"
+          data-keys="collabHeading collabIntro collabGoals seriesName seriesTagline seriesBody seriesKey seriesImages seriesLinks"
+          className="scroll-mt-20 flex flex-col gap-8"
+        >
+          <Group title="Collaborations page" description="Intro and goals for the Collaborations page. Partners themselves are edited under Partners.">
+            <TextField label="Heading" value={draft.collabHeading} onChange={(v) => set("collabHeading", v)} error={err("collabHeading")} maxLength={160} />
+            <TextArea label="Intro" value={draft.collabIntro} onChange={(v) => set("collabIntro", v)} error={err("collabIntro")} rows={4} maxLength={1000} />
+            <ListEditor
+              items={draft.collabGoals}
+              onChange={(v) => set("collabGoals", v)}
+              blank={() => ({ title: "", description: "" })}
+              addLabel="Add goal"
+              itemName="goal"
+              max={8}
+              error={err("collabGoals")}
+              render={(g, update, i) => (
+                <div className="flex flex-col gap-3">
+                  <TextField label="Title" value={g.title} onChange={(v) => update({ ...g, title: v })} error={err(`collabGoals.${i}.title`)} maxLength={80} />
+                  <TextArea
+                    label="Description"
+                    value={g.description}
+                    onChange={(v) => update({ ...g, description: v })}
+                    error={err(`collabGoals.${i}.description`)}
+                    rows={2}
+                    maxLength={300}
+                  />
+                </div>
+              )}
+            />
+          </Group>
+
+          <Group title="Workshop series" description="Shown on the Collaborations page. Leave the name empty to hide this section.">
+            <Grid>
+              <TextField label="Series name" value={draft.seriesName} onChange={(v) => set("seriesName", v)} error={err("seriesName")} maxLength={60} placeholder="Vortex" />
+              <TextField label="Tagline" value={draft.seriesTagline} onChange={(v) => set("seriesTagline", v)} error={err("seriesTagline")} maxLength={120} />
+            </Grid>
+            <TextArea
+              label="Body"
+              value={draft.seriesBody}
+              onChange={(v) => set("seriesBody", v)}
+              error={err("seriesBody")}
+              rows={8}
+              maxLength={3000}
+              hint="Separate paragraphs with a blank line."
+            />
+            <TextField
+              label="Series key"
+              value={draft.seriesKey}
+              onChange={(v) => set("seriesKey", v.toLowerCase().replace(/\s+/g, "-"))}
+              error={err("seriesKey")}
+              maxLength={40}
+              placeholder="vortex"
+              className="font-mono"
+              hint="Events whose Series field matches this key are listed as sessions, e.g. vortex."
+            />
+            <MultiImageField label="Photos" value={draft.seriesImages} onChange={(v) => set("seriesImages", v)} error={err("seriesImages")} max={40} />
+            <ListEditor
+              items={draft.seriesLinks}
+              onChange={(v) => set("seriesLinks", v)}
+              blank={() => ({ label: "", url: "" })}
+              addLabel="Add link"
+              itemName="link"
+              max={6}
+              error={err("seriesLinks")}
+              render={(l, update, i) => (
+                <Grid>
+                  <TextField label="Label" value={l.label} onChange={(v) => update({ ...l, label: v })} error={err(`seriesLinks.${i}.label`)} maxLength={80} />
+                  <TextField label="URL" value={l.url} onChange={(v) => update({ ...l, url: v })} error={err(`seriesLinks.${i}.url`)} inputMode="url" placeholder="https://…" />
+                </Grid>
+              )}
+            />
+          </Group>
+        </div>
+
+        <div id="s-certs" data-keys="certSignatories" className="scroll-mt-20">
+          <Group
+            title="Certificates"
+            description="Printed on every certificate. Partner logos come from Partners (those marked On certificates)."
+            footer="Leave empty for a certificate without signature lines."
+          >
+            <ListEditor
+              items={draft.certSignatories}
+              onChange={(v) => set("certSignatories", v)}
+              blank={() => ({ name: "", title: "" })}
+              addLabel="Add signatory"
+              itemName="signatory"
+              max={3}
+              error={err("certSignatories")}
+              render={(s, update, i) => (
+                <Grid>
+                  <TextField label="Name" value={s.name} onChange={(v) => update({ ...s, name: v })} error={err(`certSignatories.${i}.name`)} maxLength={80} />
+                  <TextField
+                    label="Title"
+                    value={s.title}
+                    onChange={(v) => update({ ...s, title: v })}
+                    error={err(`certSignatories.${i}.title`)}
+                    maxLength={120}
+                    placeholder="Faculty Convenor, Life Robo"
+                  />
+                </Grid>
+              )}
+            />
           </Group>
         </div>
 

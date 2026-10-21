@@ -1,4 +1,4 @@
-import type { Alert, ClubEvent, GalleryImage, Post, Project, SitePayload, TeamMember } from "@shared/types";
+import type { Alert, ClubEvent, GalleryImage, Partner, Post, Project, SitePayload, TeamMember } from "@shared/types";
 import { loadSettings } from "./settings";
 import { fromRow, tables } from "./tables";
 
@@ -14,9 +14,12 @@ async function all<T>(db: D1Database, table: keyof typeof tables, sql: string, .
   return results.map((r) => fromRow<T>(tables[table], r));
 }
 
-export function listEvents(db: D1Database, status?: string): Promise<ClubEvent[]> {
+export function listEvents(db: D1Database, status?: string, series?: string): Promise<ClubEvent[]> {
   // An event counts as upcoming until 6h after it ends (or starts, if no end).
   const cutoff = new Date(Date.now() - 6 * 3600_000).toISOString();
+  if (series) {
+    return all(db, "events", "SELECT * FROM events WHERE published = 1 AND series = ?1 ORDER BY starts_at ASC", series);
+  }
   if (status === "upcoming") {
     return all(db, "events", "SELECT * FROM events WHERE published = 1 AND COALESCE(ends_at, starts_at) >= ?1 ORDER BY starts_at ASC", cutoff);
   }
@@ -53,6 +56,10 @@ export function listGallery(db: D1Database, featuredOnly = false): Promise<Galle
     : all(db, "gallery", "SELECT * FROM gallery ORDER BY sort, id");
 }
 
+export function listPartners(db: D1Database): Promise<Partner[]> {
+  return all(db, "partners", "SELECT * FROM partners WHERE active = 1 ORDER BY sort, id");
+}
+
 export function listPosts(db: D1Database, limit = 100): Promise<Post[]> {
   return all(db, "posts", "SELECT * FROM posts WHERE published = 1 AND published_at <= ?1 ORDER BY published_at DESC LIMIT ?2", nowIso(), limit);
 }
@@ -77,7 +84,7 @@ export async function getActiveAlert(db: D1Database): Promise<Alert | null> {
 }
 
 export async function getSitePayload(db: D1Database): Promise<SitePayload> {
-  const [settings, alert, upcomingEvents, featuredEvents, featuredProjects, latestPosts, team, gallery] = await Promise.all([
+  const [settings, alert, upcomingEvents, featuredEvents, featuredProjects, latestPosts, team, gallery, partners] = await Promise.all([
     loadSettings(db),
     getActiveAlert(db),
     listEvents(db, "upcoming"),
@@ -86,6 +93,7 @@ export async function getSitePayload(db: D1Database): Promise<SitePayload> {
     listPosts(db, 3),
     listTeam(db),
     listGallery(db, true),
+    listPartners(db),
   ]);
-  return { settings, alert, upcomingEvents, featuredEvents, featuredProjects, latestPosts, team, gallery };
+  return { settings, alert, upcomingEvents, featuredEvents, featuredProjects, latestPosts, team, gallery, partners };
 }

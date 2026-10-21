@@ -57,6 +57,18 @@ export interface Settings {
   seoTitle: string;
   seoDescription: string;
   ogImage: string;
+  // Collaborations page
+  collabHeading: string;
+  collabIntro: string;
+  collabGoals: Step[];
+  seriesName: string;
+  seriesTagline: string;
+  seriesBody: string;
+  seriesKey: string; // events whose `series` matches are listed as sessions
+  seriesImages: string[];
+  seriesLinks: { label: string; url: string }[];
+  // Certificates
+  certSignatories: { name: string; title: string }[];
 }
 
 export type AlertTone = "info" | "highlight" | "urgent";
@@ -91,6 +103,8 @@ export interface ClubEvent {
   coverAlt: string;
   images: string[];
   registerUrl: string;
+  series: string; // e.g. "vortex"; groups workshops of one series
+  registrationOpen: boolean; // on-site registration form
   featured: boolean;
   published: boolean;
   status: EventStatus; // computed server-side from dates
@@ -174,6 +188,82 @@ export interface Signup {
   createdAt: ISODate;
 }
 
+export interface Partner {
+  id: number;
+  name: string;
+  shortName: string;
+  logo: string;
+  summary: string;
+  body: string;
+  website: string;
+  instagram: string;
+  linkedin: string;
+  onCertificate: boolean;
+  active: boolean;
+  sort: number;
+  createdAt: ISODate;
+  updatedAt: ISODate;
+}
+
+export type RegistrationSource = "online" | "walk_in";
+
+export interface Registration {
+  id: number;
+  eventId: number;
+  name: string;
+  email: string;
+  phone: string;
+  course: string;
+  source: RegistrationSource;
+  attended: boolean;
+  attendedAt: ISODate | null;
+  code: string;
+  confirmationSentAt: ISODate | null;
+  certificateSentAt: ISODate | null;
+  emailError: string;
+  createdAt: ISODate;
+}
+
+export interface RegistrationInput {
+  name: string;
+  email: string;
+  phone?: string;
+  course?: string;
+  website?: string; // honeypot
+}
+
+export interface AttendanceEvent {
+  id: number;
+  slug: string;
+  title: string;
+  startsAt: ISODate;
+  endsAt: ISODate | null;
+  status: EventStatus;
+  registrationOpen: boolean;
+  registered: number;
+  present: number;
+  certificatesSent: number;
+}
+
+export interface MailStatus {
+  configured: boolean;
+}
+
+export interface CertificateSendResult {
+  sent: number;
+  failed: number;
+  remaining: number; // present attendees with an email who still have no certificate
+  quota?: number; // emails Gmail will still send today
+  error?: string;
+}
+
+export interface Certificate {
+  code: string;
+  name: string;
+  issuedAt: ISODate;
+  event: { title: string; slug: string; startsAt: ISODate; endsAt: ISODate | null; venue: string; series: string };
+}
+
 export interface SignupInput {
   name: string;
   email: string;
@@ -192,6 +282,7 @@ export interface SitePayload {
   latestPosts: Post[];
   team: TeamMember[];
   gallery: GalleryImage[];
+  partners: Partner[];
 }
 
 export interface ListResponse<T> {
@@ -215,4 +306,4 @@ export interface UploadResponse {
 // Body for admin create/update: the item minus server-managed fields.
 export type Editable<T> = Omit<T, "id" | "createdAt" | "updatedAt" | "status">;
 
-export type AdminTable = "events" | "projects" | "team" | "gallery" | "posts" | "alerts";
+export type AdminTable = "events" | "projects" | "team" | "gallery" | "posts" | "alerts" | "partners";

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Routes } from "react-router";
 import { Collection } from "./Collection";
 import { ApiError, UNAUTHORIZED_EVENT, adminApi } from "./adminApi";
-import { alertsConfig, eventsConfig, galleryConfig, postsConfig, projectsConfig, teamConfig } from "./configs";
+import AttendancePage from "./AttendancePage";
+import { alertsConfig, eventsConfig, galleryConfig, partnersConfig, postsConfig, projectsConfig, teamConfig } from "./configs";
 import Dashboard from "./Dashboard";
 import Login from "./Login";
 import MediaPage from "./MediaPage";
@@ -115,6 +116,8 @@ export default function AdminApp() {
           <Route path="team/*" element={<Collection key="team" config={teamConfig} />} />
           <Route path="gallery/*" element={<Collection key="gallery" config={galleryConfig} />} />
           <Route path="blog/*" element={<Collection key="blog" config={postsConfig} />} />
+          <Route path="partners/*" element={<Collection key="partners" config={partnersConfig} />} />
+          <Route path="attendance/*" element={<AttendancePage />} />
           <Route path="signups" element={<SignupsPage />} />
           <Route path="media" element={<MediaPage />} />
           <Route

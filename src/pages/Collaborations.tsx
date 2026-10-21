@@ -80,14 +80,19 @@ export default function Collaborations() {
     <>
       <PageHero eyebrow="Collaborations" title={settings.collabHeading || "Collaborations"} intro={settings.collabIntro || undefined}>
         {partners.length > 0 && (
-          <div className="mt-12 flex flex-wrap items-center gap-3 sm:gap-5" aria-label="Life Robo and its partners">
-            <LogoTile src="/brand/logo-hd.jpg" alt={`${settings.shortName} logo`} className="h-24 w-24 !rounded-full !bg-black !p-0 sm:h-32 sm:w-32 md:h-36 md:w-36" />
+          // One row at every width: tiles shrink to share the space instead of wrapping.
+          <div className="mt-12 flex max-w-[560px] flex-nowrap items-center gap-2 sm:gap-5" aria-label="Life Robo and its partners">
+            <LogoTile
+              src="/brand/logo-hd.jpg"
+              alt={`${settings.shortName} logo`}
+              className="aspect-square min-w-0 max-w-36 flex-1 !rounded-full !bg-black !p-0"
+            />
             {partners.map((p) => (
               <span key={p.id} className="contents">
-                <span className="text-[28px] font-light text-dim sm:text-[36px]" aria-hidden="true">
+                <span className="shrink-0 text-[20px] font-light text-dim sm:text-[36px]" aria-hidden="true">
                   ×
                 </span>
-                <LogoTile src={p.logo} alt={`${p.name} logo`} className="h-24 w-24 sm:h-32 sm:w-32 md:h-36 md:w-36" />
+                <LogoTile src={p.logo} alt={`${p.name} logo`} className="aspect-square min-w-0 max-w-36 flex-1" />
               </span>
             ))}
           </div>

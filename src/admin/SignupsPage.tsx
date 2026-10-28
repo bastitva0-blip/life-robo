@@ -101,8 +101,8 @@ export default function SignupsPage() {
                       <a href={`mailto:${s.email}`} className="text-accent hover:underline">{s.email}</a>
                       {s.phone && <div className="text-muted">{s.phone}</div>}
                     </td>
-                    <td className="px-4 py-3 text-muted">{s.course || "—"}</td>
-                    <td className="max-w-[260px] px-4 py-3 text-muted"><p className="line-clamp-3 whitespace-pre-line">{s.interests || "—"}</p></td>
+                    <td className="px-4 py-3 text-muted">{s.course || "-"}</td>
+                    <td className="max-w-[260px] px-4 py-3 text-muted"><p className="line-clamp-3 whitespace-pre-line">{s.interests || "-"}</p></td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted">
                       {fmtDate(s.createdAt)}
                       <div className="text-[12px] text-dim">{fmtTime(s.createdAt)}</div>

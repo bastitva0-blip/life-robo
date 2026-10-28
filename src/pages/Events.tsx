@@ -147,7 +147,7 @@ export default function Events() {
             Build. Compete. <span className="text-gradient">Repeat.</span>
           </>
         }
-        intro="Hands-on workshops, robotics competitions and build nights — open to every student at FoET."
+        intro="Hands-on workshops, robotics competitions and build nights, open to every student at FoET."
       />
       <Upcoming />
       <Past />

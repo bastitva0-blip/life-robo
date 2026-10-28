@@ -45,7 +45,7 @@ export async function resolveMeta(db: D1Database, path: string, settings: Settin
     noindex: false,
   };
   const p = path.length > 1 ? path.replace(/\/+$/, "") : path;
-  const suffix = ` — ${settings.shortName}`;
+  const suffix = ` | ${settings.shortName}`;
 
   if (p === "/admin" || p.startsWith("/admin/")) {
     return { ...base, title: `Admin${suffix}`, noindex: true };

@@ -103,7 +103,7 @@ export default function Dashboard() {
           ) : live ? (
             <AlertStrip message={live.message} linkLabel={live.linkLabel} linkUrl={live.linkUrl} image={live.image} tone={live.tone} />
           ) : (
-            <p className="text-[14px] text-muted">No alert is live — the site shows the default “Join” strip while sign-ups are open.</p>
+            <p className="text-[14px] text-muted">No alert is live, so the site shows the default “Join” strip while sign-ups are open.</p>
           )}
         </section>
         <section className="rounded-2xl border border-line bg-elev p-4 sm:p-5" aria-labelledby="dash-next">

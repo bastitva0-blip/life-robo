@@ -82,7 +82,7 @@ function CollectionList<T extends Base>({ config }: { config: CollectionConfig<T
     mutate((d) => ({ ...d, items: next }));
     try {
       await adminApi.post(`/api/admin/reorder/${config.table}`, { ids: next.map((i) => i.id) });
-      toast.success("Order saved — live on the site within ~30 seconds");
+      toast.success("Order saved. Live on the site within ~30 seconds");
     } catch (err) {
       toast.error(`Couldn't save the new order: ${errorMessage(err)}`);
       reload();
@@ -324,7 +324,7 @@ function CollectionEditor<T extends Base>({ config, item }: { config: Collection
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setErrors({ slug: err.message || "That slug is already in use" });
-        toast.error("That slug is already in use — pick another.");
+        toast.error("That slug is already in use. Pick another.");
       } else if (err instanceof ApiError && err.status === 400) {
         const fe = fieldErrors(err);
         setErrors(Object.keys(fe).length ? fe : { "": err.message });

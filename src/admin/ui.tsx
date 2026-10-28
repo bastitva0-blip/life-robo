@@ -699,7 +699,7 @@ export function ErrorSummary({ errors }: { errors: Record<string, string> }) {
         {entries.map(([k, v]) => (
           <li key={k}>
             {k ? <span className="font-mono text-[13px] text-muted">{k}</span> : null}
-            {k ? " — " : ""}
+            {k ? ": " : ""}
             {v}
           </li>
         ))}

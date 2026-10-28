@@ -31,7 +31,7 @@ export default function Gallery() {
             Moments from <span className="text-gradient">the lab.</span>
           </>
         }
-        intro="Workshops, competitions and late-night builds — captured along the way."
+        intro="Workshops, competitions and late-night builds, captured along the way."
       />
       <section className="container-x pb-24 md:pb-32" aria-label="Photo gallery">
         {loading ? (

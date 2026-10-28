@@ -43,7 +43,7 @@ export default function Projects() {
             Ideas, <span className="text-gradient">built.</span>
           </>
         }
-        intro="From line followers to autonomous rovers — a look at what our members have designed, wired and coded."
+        intro="From line followers to autonomous rovers: a look at what our members have designed, wired and coded."
       />
       <section className="container-x pb-24 md:pb-32" aria-labelledby="projects-title">
         <h2 id="projects-title" className="sr-only">

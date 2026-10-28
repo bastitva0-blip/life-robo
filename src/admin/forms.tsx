@@ -451,16 +451,16 @@ export function PostForm({ draft, set, errors, isNew }: FormProps<Post>) {
 /* ---------- Alerts ---------- */
 
 const toneOptions = [
-  { value: "highlight" as const, label: "Highlight — violet (events, sign-ups)" },
-  { value: "urgent" as const, label: "Urgent — red (deadlines, changes)" },
-  { value: "info" as const, label: "Info — neutral" },
+  { value: "highlight" as const, label: "Highlight: violet (events, sign-ups)" },
+  { value: "urgent" as const, label: "Urgent: red (deadlines, changes)" },
+  { value: "info" as const, label: "Info: neutral" },
 ];
 
 const stateCopy = {
-  live: "Live now — this alert is eligible to show on the site.",
-  scheduled: "Scheduled — it will go live at the start time.",
-  expired: "Expired — the end time has passed.",
-  off: "Off — turn on Active to show it.",
+  live: "Live now. This alert is eligible to show on the site.",
+  scheduled: "Scheduled. It will go live at the start time.",
+  expired: "Expired. The end time has passed.",
+  off: "Off. Turn on Active to show it.",
 };
 
 export function AlertForm({ draft, set, errors }: FormProps<Alert>) {

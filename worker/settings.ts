@@ -67,7 +67,7 @@ export const settingsSchema = z.object({
 
 // Fallbacks so the site still renders if a key is missing from D1.
 export const defaultSettings: Settings = {
-  siteName: "Life Robo — Robotics Club, FoET, University of Lucknow",
+  siteName: "Life Robo | Robotics Club, FoET, University of Lucknow",
   shortName: "Life Robo",
   tagline: "Innovate. Build. Compete.",
   logoUrl: "/brand/logo-badge.png",
@@ -93,7 +93,7 @@ export const defaultSettings: Settings = {
   joinOpen: true,
   joinHeading: "Build with us.",
   joinBody: "",
-  seoTitle: "Life Robo — Robotics Club",
+  seoTitle: "Life Robo | Robotics Club",
   seoDescription: "",
   ogImage: "/brand/og-default.jpg",
   collabHeading: "Collaborations",

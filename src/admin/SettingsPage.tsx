@@ -272,7 +272,7 @@ function SettingsEditor({ initial }: { initial: Settings }) {
         </div>
 
         <div id="s-links" data-keys="importantLinks" className="scroll-mt-20">
-          <Group title="Important links" description="Shown in the footer — forms, notices, university pages. Up to 12.">
+          <Group title="Important links" description="Shown in the footer: forms, notices, university pages. Up to 12.">
             <ListEditor
               items={draft.importantLinks}
               onChange={(v) => set("importantLinks", v)}

@@ -60,8 +60,8 @@ export const UPLOAD_HINT = "JPEG, PNG, WebP, GIF or AVIF. Photos are resized to 
 export function checkImage(file: File): string | null {
   if (!IMAGE_TYPES.includes(file.type)) return `“${file.name}” isn't a JPEG, PNG, WebP, GIF or AVIF image.`;
   if (file.type === "image/gif" && file.size > MAX_UPLOAD)
-    return `“${file.name}” is ${fmtBytes(file.size)} — GIFs aren't compressed (to keep animation) and must be 5 MB or smaller.`;
-  if (file.size > MAX_ORIGINAL) return `“${file.name}” is ${fmtBytes(file.size)} — too large to process. Use an image under 40 MB.`;
+    return `“${file.name}” is ${fmtBytes(file.size)} . GIFs aren't compressed (to keep animation) and must be 5 MB or smaller.`;
+  if (file.size > MAX_ORIGINAL) return `“${file.name}” is ${fmtBytes(file.size)} , too large to process. Use an image under 40 MB.`;
   return null;
 }
 
@@ -94,7 +94,7 @@ export async function compressImage(file: File): Promise<Compressed> {
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    return keep; // browser can't decode (e.g. AVIF on older browsers) — let the server take the original
+    return keep; // browser can't decode (e.g. AVIF on older browsers), so let the server take the original
   }
   const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
   const w = Math.max(1, Math.round(bitmap.width * scale));
@@ -159,7 +159,7 @@ export async function uploadImage(
   const c = await compressImage(original);
   onCompressed?.(c);
   if (c.size > MAX_UPLOAD)
-    throw new ApiError(`“${original.name}” is still ${fmtBytes(c.size)} after compression — images must be 5 MB or smaller.`, 413);
+    throw new ApiError(`“${original.name}” is still ${fmtBytes(c.size)} after compression. Images must be 5 MB or smaller.`, 413);
   const res = await new Promise<UploadResponse>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/admin/upload");
@@ -168,7 +168,7 @@ export async function uploadImage(
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress?.(e.loaded / e.total);
     };
-    xhr.onerror = () => reject(new ApiError("Network error — check your connection and try again.", 0));
+    xhr.onerror = () => reject(new ApiError("Network error. Check your connection and try again.", 0));
     xhr.onload = () => {
       const body = xhr.response as (UploadResponse & { error?: string }) | null;
       if (xhr.status >= 200 && xhr.status < 300 && body?.url) return resolve(body);

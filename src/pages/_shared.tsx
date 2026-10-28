@@ -56,7 +56,7 @@ export function DetailSkeleton({ aspect = "4/5" }: { aspect?: string }) {
 export function ImageGrid({ images, title }: { images: string[]; title: string }) {
   const [open, setOpen] = useState<number | null>(null);
   const items: LightboxItem[] = useMemo(
-    () => images.filter(Boolean).map((src, i) => ({ src, alt: `${title} — photo ${i + 1}` })),
+    () => images.filter(Boolean).map((src, i) => ({ src, alt: `${title}, photo ${i + 1}` })),
     [images, title],
   );
   if (!items.length) return null;

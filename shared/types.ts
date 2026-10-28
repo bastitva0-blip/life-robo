@@ -271,7 +271,7 @@ export interface SignupInput {
   phone?: string;
   course?: string;
   interests?: string;
-  website?: string; // honeypot — must be empty
+  website?: string; // honeypot, must be empty
 }
 
 export interface SitePayload {

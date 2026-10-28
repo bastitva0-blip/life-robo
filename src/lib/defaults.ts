@@ -2,7 +2,7 @@ import type { Settings } from "@shared/types";
 
 /** Fallback copy used only if /api/site is unreachable, so the shell still renders. */
 export const DEFAULT_SETTINGS: Settings = {
-  siteName: "Life Robo — Robotics Club, FoET, University of Lucknow",
+  siteName: "Life Robo | Robotics Club, FoET, University of Lucknow",
   shortName: "Life Robo",
   tagline: "Innovate. Build. Compete.",
   logoUrl: "/brand/logo-badge.png",
@@ -31,7 +31,7 @@ export const DEFAULT_SETTINGS: Settings = {
   joinOpen: true,
   joinHeading: "Join Life Robo",
   joinBody: "",
-  seoTitle: "Life Robo — Robotics Club, FoET, University of Lucknow",
+  seoTitle: "Life Robo | Robotics Club, FoET, University of Lucknow",
   seoDescription: "",
   ogImage: "/brand/og-default.jpg",
   collabHeading: "Collaborations",

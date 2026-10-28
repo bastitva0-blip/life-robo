@@ -75,7 +75,7 @@ function TopStrip() {
     const ev = data.upcomingEvents[0];
     strip = {
       key: `lr-strip-event-${ev.id}-${ev.updatedAt}`,
-      message: `Upcoming: ${ev.title} — ${fmtDate(ev.startsAt, { day: "numeric", month: "short" })}. Register now.`,
+      message: `Upcoming: ${ev.title}, ${fmtDate(ev.startsAt, { day: "numeric", month: "short" })}. Register now.`,
       href: `/events/${ev.slug}`,
       label: "See details",
       image: ev.cover,
@@ -84,7 +84,7 @@ function TopStrip() {
   } else if (data && settings.joinOpen) {
     strip = {
       key: "lr-strip-join-default",
-      message: "Sign-ups are open — join Life Robo.",
+      message: "Sign-ups are open. Join Life Robo.",
       href: "/join",
       label: "Join now",
       image: "",
@@ -186,7 +186,7 @@ function Nav() {
         )}
       >
         <div className="container-x flex h-14 items-center justify-between gap-4 md:h-16">
-          <Link to="/" className="flex items-center gap-3 rounded-full" aria-label={`${settings.shortName} — home`}>
+          <Link to="/" className="flex items-center gap-3 rounded-full" aria-label={`${settings.shortName} home`}>
             <Badge src={settings.logoUrl} size={32} />
             <Wordmark className="text-[13px] text-fg md:text-[14px]" />
           </Link>

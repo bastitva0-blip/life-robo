@@ -58,7 +58,7 @@ export function pickLiveAlert(alerts: Alert[]): Alert | null {
   );
 }
 
-export const SAVED_MESSAGE = "Saved — live on the site within ~30 seconds";
+export const SAVED_MESSAGE = "Saved. Live on the site within ~30 seconds";
 
 export function stableJson(v: unknown) {
   return JSON.stringify(v);

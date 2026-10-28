@@ -64,7 +64,7 @@ export function GalleryBulk({ reload }: { items: GalleryImage[]; reload: () => v
     setRunning(false);
     if (fileRef.current) fileRef.current.value = "";
     if (ok) {
-      toast.success(`${ok} photo${ok === 1 ? "" : "s"} added to the gallery — live within ~30 seconds`);
+      toast.success(`${ok} photo${ok === 1 ? "" : "s"} added to the gallery. Live within ~30 seconds`);
       reload();
     }
     if (ok < files.length) toast.error(`${files.length - ok} file${files.length - ok === 1 ? "" : "s"} couldn't be added.`);

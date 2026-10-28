@@ -76,7 +76,7 @@ export const eventsConfig: CollectionConfig<ClubEvent> = {
   },
   viewUrl: (d) => (d.published ? `/events/${d.slug}` : null),
   Form: EventForm,
-  emptyBody: "Create your first event — it'll appear on the Events page and, if upcoming, on the home page.",
+  emptyBody: "Create your first event. It'll appear on the Events page and, if upcoming, on the home page.",
 };
 
 export const projectsConfig: CollectionConfig<Project> = {
@@ -146,7 +146,7 @@ export const teamConfig: CollectionConfig<TeamMember> = {
   roundThumb: true,
   badges: (i) => (
     <>
-      <Badge>{i.group || "—"}</Badge>
+      <Badge>{i.group || "-"}</Badge>
       {!i.active && <Badge tone="amber">Hidden</Badge>}
     </>
   ),

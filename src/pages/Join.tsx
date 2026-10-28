@@ -85,7 +85,7 @@ function Success({ name }: { name: string }) {
       <ol className="mx-auto mt-8 max-w-md space-y-4 text-left">
         {[
           "A club lead will reach out by email or phone with orientation details.",
-          "Come to the next workshop or build night — no experience needed.",
+          "Come to the next workshop or build night. No experience needed.",
           "Pick a track and start building with a team.",
         ].map((s, i) => (
           <li key={i} className="flex gap-4">
@@ -237,7 +237,7 @@ export default function Join() {
                   id={id("interests")}
                   label="What are you interested in?"
                   optional
-                  hint="Robotics, embedded, AI, design, events — anything goes."
+                  hint="Robotics, embedded, AI, design, events: anything goes."
                   error={errors.interests}
                 >
                   <textarea rows={4} maxLength={1500} {...fieldProps("interests", true)} />

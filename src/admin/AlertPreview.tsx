@@ -21,7 +21,7 @@ export function AlertsLiveNow({ items }: { items: Alert[] }) {
         <AlertStrip message={live.message} linkLabel={live.linkLabel} linkUrl={live.linkUrl} image={live.image} tone={live.tone} />
       ) : (
         <>
-          <AlertStrip message="Sign-ups are open — join Life Robo." linkLabel="Join now" linkUrl="/join" image="" tone="highlight" />
+          <AlertStrip message="Sign-ups are open. Join Life Robo." linkLabel="Join now" linkUrl="/join" image="" tone="highlight" />
           <p className="mt-2 text-[13px] text-dim">
             No alert is live, so visitors see the default join strip (only while sign-ups are open in Site content → Join).
           </p>

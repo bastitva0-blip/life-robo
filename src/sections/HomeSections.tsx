@@ -265,7 +265,7 @@ export function EventsSection() {
         ) : (
           <EmptyState
             title="No upcoming events right now"
-            body="New workshops and talks are announced on Instagram first — follow us so you don't miss the next one."
+            body="New workshops and talks are announced on Instagram first, so follow us so you don't miss the next one."
             instagram={settings.socials.instagram}
           />
         )}
@@ -351,7 +351,7 @@ export function Highlights() {
           className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
           style={{ paddingInline: GUTTER, scrollPaddingInline: GUTTER }}
           tabIndex={0}
-          aria-label="Highlight photos — scroll horizontally"
+          aria-label="Highlight photos, scroll horizontally"
         >
           {items.map((g, i) => (
             <li key={g.id} className="w-[84vw] shrink-0 snap-start sm:w-[560px] lg:w-[680px]" aria-roledescription="slide" aria-label={`${i + 1} of ${items.length}`}>

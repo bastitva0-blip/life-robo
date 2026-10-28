@@ -49,7 +49,7 @@ export default function MediaPage() {
       await navigator.clipboard.writeText(url);
       toast.success("Path copied");
     } catch {
-      toast.error("Couldn't copy — select the text instead.");
+      toast.error("Couldn't copy. Select the text instead.");
     }
   };
 
@@ -95,7 +95,7 @@ export default function MediaPage() {
         onChange={(e) => void onFiles(Array.from(e.target.files ?? []))}
       />
       <p className="mb-4 text-[13px] text-dim">
-        {UPLOAD_HINT} Deleting an image here doesn't remove it from content that uses it — those spots will show a placeholder. Bundled photos under /photos/ aren't listed.
+        {UPLOAD_HINT} Deleting an image here doesn't remove it from content that uses it; those spots will show a placeholder. Bundled photos under /photos/ aren't listed.
       </p>
       {error && !data ? (
         <LoadError error={error} onRetry={reload} />

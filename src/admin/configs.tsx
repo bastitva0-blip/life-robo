@@ -43,6 +43,7 @@ export const eventsConfig: CollectionConfig<ClubEvent> = {
     cover: "",
     coverAlt: "",
     images: [],
+    resources: [],
     registerUrl: "",
     series: "",
     registrationOpen: false,

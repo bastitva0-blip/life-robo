@@ -44,7 +44,6 @@ export default function PostDetail() {
           <Reveal className="mx-auto mt-8 max-w-3xl">
             <p className="text-[15px] text-muted">
               <time dateTime={post.publishedAt}>{fmtDate(post.publishedAt, { month: "long" })}</time>
-              {post.author && <> · By {post.author}</>}
             </p>
             <h1 className="headline mt-4">{post.title}</h1>
             {post.excerpt && <p className="mt-6 text-lg text-muted md:text-xl">{post.excerpt}</p>}

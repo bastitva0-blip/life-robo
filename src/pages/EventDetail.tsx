@@ -9,6 +9,8 @@ import NotFound from "./NotFound";
 import { BackLink, DetailShell, DetailSkeleton, ImageGrid, Markdown, is404 } from "./_shared";
 import { RegisterForm } from "./_RegisterForm";
 
+const fileKind = (url: string) => /\.(pdf|pptx?)(?:$|\?)/i.exec(url)?.[1].toUpperCase() ?? "Link";
+
 export default function EventDetail() {
   const { slug = "" } = useParams();
   const { data, error, loading, retry } = useApi<ItemResponse<ClubEvent>>(`/api/events/${encodeURIComponent(slug)}`);
@@ -72,6 +74,29 @@ export default function EventDetail() {
               <Markdown source={event.body} className="prose-lr mt-10 max-w-2xl" />
             </Reveal>
           </div>
+
+          {event.resources?.some((r) => safeHref(r.url)) && (
+            <section className="mt-20 md:mt-28" aria-labelledby="event-resources">
+              <h2 id="event-resources" className="title mb-8">
+                Session resources
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {event.resources
+                  .filter((r) => safeHref(r.url))
+                  .map((r) => (
+                    <li key={r.url}>
+                      <SmartLink href={r.url} className="card flex items-center justify-between gap-4 p-5 transition-colors hover:bg-white/[0.04]">
+                        <span className="min-w-0">
+                          <span className="block truncate text-[17px] font-semibold">{r.label}</span>
+                          <span className="text-[13px] uppercase tracking-wide text-dim">{fileKind(r.url)}</span>
+                        </span>
+                        <ArrowUpRight size={18} className="shrink-0 text-accent" />
+                      </SmartLink>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          )}
 
           {event.images?.some(Boolean) && (
             <section className="mt-20 md:mt-28" aria-labelledby="event-photos">

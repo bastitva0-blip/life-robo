@@ -1,12 +1,13 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { cx } from "@/lib/format";
 import { Close, Plus, Upload } from "@/components/icons";
-import { IMAGE_ACCEPT, UPLOAD_HINT, checkImage, errorMessage, fmtBytes, sizeLabel, uploadImage, type MediaItem } from "./adminApi";
+import { IMAGE_ACCEPT, UPLOAD_HINT, adminApi, checkImage, errorMessage, fmtBytes, sizeLabel, uploadImage, type MediaItem } from "./adminApi";
 import { useAdminData } from "./hooks";
 import { toast } from "./toast";
 import { Empty, IconButton, LoadError, Modal, Spinner } from "./ui";
 
 const isUrlish = (v: string) => v === "" || v.startsWith("/") || /^https?:\/\//i.test(v);
+const isRemote = (v: string) => /^https:\/\//i.test(v);
 
 /** Uploads one file with progress state; returns the URL or null. Progress -1 = compressing. */
 function useUploader() {
@@ -78,6 +79,7 @@ export function ImagePicker({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [broken, setBroken] = useState<string | null>(null);
   const { progress, error: upErr, setError, info, setInfo, upload } = useUploader();
+  const [importing, setImporting] = useState(false);
   const urlInvalid = !isUrlish(value.trim());
   const shownError = error || upErr || (urlInvalid ? "Must be a /path or an http(s) URL" : undefined);
 
@@ -86,6 +88,21 @@ export function ImagePicker({
     const url = await upload(file);
     if (url) onChange(url);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const importRemote = async () => {
+    setImporting(true);
+    setError(null);
+    try {
+      const res = await adminApi.post<{ url: string }>("/api/admin/import-image", { url: value.trim() });
+      onChange(res.url);
+      setInfo("Saved a copy to the media library");
+      toast.success("Image saved to the library");
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (
@@ -134,6 +151,11 @@ export function ImagePicker({
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setLibraryOpen(true)}>
               Choose from library
             </button>
+            {isRemote(value.trim()) && (
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => void importRemote()} disabled={importing}>
+                {importing && <Spinner size={14} />} Save a copy
+              </button>
+            )}
             {value && (
               <button type="button" className="btn btn-sm text-muted hover:text-fg" onClick={() => onChange("")}>
                 Remove

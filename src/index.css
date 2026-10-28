@@ -6,6 +6,7 @@
 */
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-vortex: "Orbitron", var(--font-sans);
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-canvas: #000000;
@@ -35,6 +36,28 @@
   --animate-marquee: marquee 40s linear infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-grid: gridpan 24s linear infinite;
+}
+
+/* Vortex series wordmark: animated blue-violet sheen and a slow swirl behind the hero. */
+.vortex-word {
+  background: linear-gradient(100deg, #7cc4ff 0%, #2997ff 30%, #8b5cf6 60%, #c4b5fd 80%, #2997ff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: vortex-sheen 6s linear infinite;
+}
+.vortex-swirl {
+  animation: vortex-spin 40s linear infinite;
+}
+@keyframes vortex-sheen {
+  to { background-position: 200% center; }
+}
+@keyframes vortex-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vortex-word, .vortex-swirl { animation: none; }
 }
 
 @keyframes marquee {

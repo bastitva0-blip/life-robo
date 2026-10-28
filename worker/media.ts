@@ -68,7 +68,7 @@ export async function deleteMedia(db: D1Database, key: string): Promise<void> {
 
 export async function listMedia(db: D1Database): Promise<MediaInfo[]> {
   const { results } = await db
-    .prepare("SELECT key, size, created_at FROM media ORDER BY created_at DESC LIMIT 2000")
+    .prepare("SELECT key, size, created_at FROM media WHERE content_type LIKE 'image/%' ORDER BY created_at DESC LIMIT 2000")
     .all<{ key: string; size: number; created_at: string }>();
   return results.map((r) => ({ key: r.key, url: `/media/${r.key}`, size: r.size, uploaded: r.created_at }));
 }
@@ -81,9 +81,9 @@ export async function serveMedia(db: D1Database, request: Request, key: string, 
   if (cached) return conditional(request, cached);
 
   const meta = await db
-    .prepare("SELECT content_type, size, etag, chunks FROM media WHERE key = ?1")
+    .prepare("SELECT content_type, size, etag, chunks, original_name FROM media WHERE key = ?1")
     .bind(key)
-    .first<{ content_type: string; size: number; etag: string; chunks: number }>();
+    .first<{ content_type: string; size: number; etag: string; chunks: number; original_name: string }>();
   if (!meta) return new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
 
   const { results } = await db
@@ -107,6 +107,10 @@ export async function serveMedia(db: D1Database, request: Request, key: string, 
       "Cache-Control": "public, max-age=31536000, immutable",
       ETag: `"${meta.etag}"`,
       "X-Content-Type-Options": "nosniff",
+      // Documents (slides, PDFs) keep their original file name when saved.
+      ...(meta.content_type.startsWith("image/")
+        ? {}
+        : { "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(meta.original_name || key.split("/").pop() || "file")}` }),
     },
   });
   ctx.waitUntil(cache.put(cacheKey, res.clone()));

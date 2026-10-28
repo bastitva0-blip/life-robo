@@ -18,6 +18,7 @@ export const NAV = [
   { to: "/collaborations", label: "Collaborations" },
   { to: "/gallery", label: "Gallery" },
   { to: "/blog", label: "Blog" },
+  { to: "/vortex", label: "Vortex", vortex: true },
   { to: "/contact", label: "Contact" },
 ];
 
@@ -188,10 +189,12 @@ function Nav() {
                 <NavLink
                   to={n.to}
                   className={({ isActive }) =>
-                    cx("rounded-full px-3.5 py-2 text-[14px] transition-colors", isActive ? "text-fg" : "text-muted hover:text-fg")
+                    n.vortex
+                      ? cx("font-vortex vortex-word mx-1 rounded-full border px-3.5 py-1.5 text-[13px] font-bold tracking-[0.2em] transition-colors", isActive ? "border-accent/60" : "border-line-strong hover:border-accent/60")
+                      : cx("rounded-full px-3.5 py-2 text-[14px] transition-colors", isActive ? "text-fg" : "text-muted hover:text-fg")
                   }
                 >
-                  {n.label}
+                  {n.vortex ? n.label.toUpperCase() : n.label}
                 </NavLink>
               </li>
             ))}
@@ -237,10 +240,12 @@ function Nav() {
                     to={n.to}
                     end={n.to === "/"}
                     className={({ isActive }) =>
-                      cx("block py-4 text-[28px] font-semibold tracking-tight", isActive ? "text-fg" : "text-fg/70 hover:text-fg")
+                      "vortex" in n && n.vortex
+                        ? "font-vortex vortex-word block py-4 text-[28px] font-black tracking-[0.12em]"
+                        : cx("block py-4 text-[28px] font-semibold tracking-tight", isActive ? "text-fg" : "text-fg/70 hover:text-fg")
                     }
                   >
-                    {n.label}
+                    {"vortex" in n && n.vortex ? n.label.toUpperCase() : n.label}
                   </NavLink>
                 </motion.li>
               ))}

@@ -99,8 +99,9 @@ export function SmartLink({
 }) {
   const h = safeHref(href);
   if (!h) return null;
-  if (isExternal(h)) {
-    const web = /^https?:/i.test(h);
+  // Uploaded files (/media/…) are served by the worker, not the router; open them in a new tab.
+  if (isExternal(h) || h.startsWith("/media/")) {
+    const web = /^https?:/i.test(h) || h.startsWith("/media/");
     return (
       <a href={h} className={className} aria-label={ariaLabel} {...(web ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
         {children}

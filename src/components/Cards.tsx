@@ -59,7 +59,7 @@ export function PostCard({ post }: { post: Post }) {
     <Link to={`/blog/${post.slug}`} className="card group flex h-full flex-col transition-colors hover:border-line-strong">
       <Img src={post.cover} alt={post.coverAlt || post.title} aspect="16/10" imgClassName="group-hover:scale-[1.04]" />
       <div className="flex flex-1 flex-col p-6">
-        <p className="text-[13px] text-dim">{fmtDate(post.publishedAt)}{post.author ? ` · ${post.author}` : ""}</p>
+        <p className="text-[13px] text-dim">{fmtDate(post.publishedAt)}</p>
         <h3 className="mt-2 text-[21px] font-semibold leading-tight tracking-tight">{post.title}</h3>
         <p className="mt-2 line-clamp-3 text-[15px] text-muted">{post.excerpt}</p>
         <span className="link mt-auto pt-5 text-[15px]">

@@ -60,6 +60,7 @@ const eventSchema = z.object({
   cover: urlish.default(""),
   coverAlt: text(300).default(""),
   images: z.array(urlish).max(60).default([]),
+  resources: z.array(z.object({ label: required(120), url: urlish.refine((v) => v !== "", "Required") })).max(20).default([]),
   registerUrl: urlish.default(""),
   series: z
     .string()
@@ -167,6 +168,7 @@ export const tables: Record<AdminTable, TableDef> = {
       c("cover", "text"),
       c("coverAlt", "text"),
       c("images", "json"),
+      c("resources", "json"),
       c("registerUrl", "text"),
       c("series", "text"),
       c("registrationOpen", "bool"),

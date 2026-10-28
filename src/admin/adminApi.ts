@@ -188,6 +188,19 @@ export async function uploadImage(
   return { ...res, originalSize: c.originalSize, size: c.size };
 }
 
+export const DOC_ACCEPT = ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+/** Uploads a PDF or slide deck (no compression); returns its /media URL. */
+export async function uploadFile(file: File): Promise<{ url: string; name: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/admin/upload-file", { method: "POST", body: form, credentials: "same-origin" });
+  const body = (await res.json().catch(() => null)) as { url?: string; name?: string; error?: string } | null;
+  if (res.status === 401) signalUnauthorized();
+  if (!res.ok || !body?.url) throw new ApiError(body?.error || `Upload failed (${res.status}).`, res.status);
+  return { url: body.url, name: body.name ?? file.name };
+}
+
 export interface MediaItem {
   key: string;
   url: string;

@@ -102,6 +102,7 @@ export interface ClubEvent {
   cover: string;
   coverAlt: string;
   images: string[];
+  resources: ProjectLink[]; // slides, PDFs and other session material
   registerUrl: string;
   series: string; // e.g. "vortex"; groups workshops of one series
   registrationOpen: boolean; // on-site registration form

@@ -24,6 +24,12 @@ const app = new Hono<AppEnv>();
 
 const PUBLIC_CACHE = "public, max-age=30, stale-while-revalidate=120";
 const MAX_UPLOAD = 5 * 1024 * 1024;
+const MAX_DOC = 15 * 1024 * 1024;
+const DOC_TYPES: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+};
 const IMAGE_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -257,6 +263,49 @@ app.post("/api/admin/upload", async (c) => {
 
   const key = `uploads/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}.${ext}`;
   await putMedia(c.env.DB, key, file);
+  return c.json({ url: `/media/${key}`, key }, 201);
+});
+
+// Session slides and PDFs for event resources.
+app.post("/api/admin/upload-file", async (c) => {
+  let form: FormData;
+  try {
+    form = await c.req.formData();
+  } catch {
+    return c.json({ error: "Expected multipart form data" }, 400);
+  }
+  const file = form.get("file");
+  if (!file || typeof file === "string") return c.json({ error: "Missing file" }, 400);
+  const ext = DOC_TYPES[file.type] ?? (/\.(pdf|pptx?)$/i.exec(file.name)?.[1].toLowerCase() || "");
+  const type = file.type in DOC_TYPES ? file.type : Object.keys(DOC_TYPES).find((t) => DOC_TYPES[t] === ext);
+  if (!ext || !type) return c.json({ error: "Only PDF, PPT or PPTX files are allowed" }, 415);
+  if (file.size > MAX_DOC) return c.json({ error: "File must be 15 MB or smaller" }, 413);
+
+  const key = `uploads/docs/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}.${ext}`;
+  await putMedia(c.env.DB, key, new File([file], file.name, { type }));
+  return c.json({ url: `/media/${key}`, key, name: file.name }, 201);
+});
+
+// Saves a copy of a remote image (e.g. a LinkedIn profile photo, whose links expire) into the media store.
+app.post("/api/admin/import-image", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const parsed = z.object({ url: z.string().url().max(2000) }).safeParse(body);
+  if (!parsed.success || !/^https:\/\//i.test(parsed.data.url)) return c.json({ error: "Paste a full https:// image URL" }, 400);
+  let res: Response;
+  try {
+    res = await fetch(parsed.data.url, { headers: { Accept: "image/*" }, redirect: "follow" });
+  } catch {
+    return c.json({ error: "Couldn't reach that URL" }, 502);
+  }
+  if (!res.ok) return c.json({ error: `That URL returned ${res.status}. The link may have expired; copy it again.` }, 502);
+  const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const ext = IMAGE_TYPES[type];
+  if (!ext) return c.json({ error: "That URL isn't an image. Right-click the photo and use “Copy image address”." }, 415);
+  const buf = await res.arrayBuffer();
+  if (buf.byteLength > MAX_UPLOAD) return c.json({ error: "Image must be 5 MB or smaller" }, 413);
+
+  const key = `uploads/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}.${ext}`;
+  await putMedia(c.env.DB, key, new File([buf], `imported.${ext}`, { type }));
   return c.json({ url: `/media/${key}`, key }, 201);
 });
 

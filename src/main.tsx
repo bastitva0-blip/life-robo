@@ -59,6 +59,7 @@ const router = createBrowserRouter([
       { path: "projects/:slug", lazy: page(() => import("@/pages/ProjectDetail")) },
       { path: "team", lazy: page(() => import("@/pages/Team")) },
       { path: "collaborations", lazy: page(() => import("@/pages/Collaborations")) },
+      { path: "vortex", lazy: page(() => import("@/pages/Vortex")) },
       { path: "gallery", lazy: page(() => import("@/pages/Gallery")) },
       { path: "blog", lazy: page(() => import("@/pages/Blog")) },
       { path: "blog/:slug", lazy: page(() => import("@/pages/PostDetail")) },

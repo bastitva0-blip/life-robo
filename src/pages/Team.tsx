@@ -2,16 +2,33 @@ import { useMemo } from "react";
 import type { ListResponse, TeamMember } from "@shared/types";
 import { useApi } from "@/lib/useApi";
 import { usePageMeta } from "@/lib/seo";
-import { safeHref } from "@/lib/format";
+import { cx, safeHref } from "@/lib/format";
 import { GitHub, Instagram, LinkedIn } from "@/components/icons";
 import { EmptyState, ErrorState, Img, PageHero, Reveal, Skeleton, SmartLink } from "@/components/ui";
 
-const ORDER = ["faculty", "leads", "core"];
+const ORDER = [
+  "faculty",
+  "executive board",
+  "design & hardware",
+  "embedded",
+  "ai programming & research",
+  "event management & discipline",
+  "pr, sponsor & outreach",
+  "it, media & content",
+  "alumni",
+];
 const GROUP_TITLES: Record<string, string> = {
-  faculty: "Faculty mentors",
-  leads: "Club leads",
-  core: "Core team",
+  faculty: "Faculty",
+  "executive board": "Executive board",
+  "design & hardware": "Design & Hardware team",
+  embedded: "Embedded team",
+  "ai programming & research": "AI Programming & Research team",
+  "event management & discipline": "Event Management & Discipline team",
+  "pr, sponsor & outreach": "PR, Sponsor & Outreach team",
+  "it, media & content": "IT, Media & Content team",
 };
+// Groups shown with large cards; every other group uses the denser grid.
+const FEATURED = new Set(["faculty", "executive board"]);
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -39,22 +56,22 @@ function Avatar({ member }: { member: TeamMember }) {
   );
 }
 
-function MemberCard({ member }: { member: TeamMember }) {
+function MemberCard({ member, compact }: { member: TeamMember; compact?: boolean }) {
   const socials = [
     { href: member.linkedin, label: "LinkedIn", Icon: LinkedIn },
     { href: member.github, label: "GitHub", Icon: GitHub },
     { href: member.instagram, label: "Instagram", Icon: Instagram },
   ].filter((s) => safeHref(s.href));
   return (
-    <article className="card flex h-full flex-col items-center px-6 pb-8 pt-8 text-center">
-      <div className="w-36 sm:w-40">
+    <article className={cx("card flex h-full flex-col items-center text-center", compact ? "px-4 pb-6 pt-6" : "px-6 pb-8 pt-8")}>
+      <div className={compact ? "w-24 sm:w-28" : "w-36 sm:w-40"}>
         <Avatar member={member} />
       </div>
-      <h3 className="mt-6 text-[21px] font-semibold leading-tight tracking-tight">{member.name}</h3>
-      {member.role && <p className="mt-1 text-[15px] font-medium text-accent">{member.role}</p>}
-      {member.bio && <p className="mt-3 line-clamp-4 text-[15px] text-muted">{member.bio}</p>}
+      <h3 className={cx("font-semibold leading-tight tracking-tight", compact ? "mt-4 text-[17px]" : "mt-6 text-[21px]")}>{member.name}</h3>
+      {member.role && <p className={cx("mt-1 font-medium text-accent", compact ? "text-[14px]" : "text-[15px]")}>{member.role}</p>}
+      {member.bio && <p className={cx("line-clamp-4 text-muted", compact ? "mt-1.5 text-[13px]" : "mt-3 text-[15px]")}>{member.bio}</p>}
       {socials.length > 0 && (
-        <ul className="mt-auto flex gap-2 pt-6">
+        <ul className={cx("mt-auto flex gap-2", compact ? "pt-4" : "pt-6")}>
           {socials.map(({ href, label, Icon }) => (
             <li key={label}>
               <SmartLink
@@ -88,7 +105,7 @@ function TeamSkeleton() {
 }
 
 export default function Team() {
-  usePageMeta("Team", "Meet the faculty mentors, leads and core members behind Life Robo.");
+  usePageMeta("Team", "Meet the faculty convenor, executive board and teams behind Life Robo.");
   const { data, error, loading, retry } = useApi<ListResponse<TeamMember>>("/api/team");
 
   const groups = useMemo(() => {
@@ -105,7 +122,7 @@ export default function Team() {
     };
     return Array.from(map.entries())
       .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
-      .map(([key, g]) => ({ key, title: GROUP_TITLES[key] ?? g.label, members: g.members }));
+      .map(([key, g]) => ({ key, title: GROUP_TITLES[key] ?? g.label, members: g.members, compact: !FEATURED.has(key) }));
   }, [data]);
 
   return (
@@ -134,10 +151,10 @@ export default function Team() {
                   {g.title}
                 </h2>
               </Reveal>
-              <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className={cx("grid", g.compact ? "grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4" : "gap-5 sm:grid-cols-2 lg:grid-cols-3")}>
                 {g.members.map((m, i) => (
                   <Reveal as="li" key={m.id} delay={Math.min(i % 3, 2) * 0.06}>
-                    <MemberCard member={m} />
+                    <MemberCard member={m} compact={g.compact} />
                   </Reveal>
                 ))}
               </ul>

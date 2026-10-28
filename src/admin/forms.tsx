@@ -1,8 +1,10 @@
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 import type { Alert, ClubEvent, GalleryImage, Partner, Post, Project, TeamMember } from "@shared/types";
 import type { FormProps } from "./Collection";
 import { AlertStrip } from "./AlertPreview";
+import { DOC_ACCEPT, errorMessage, uploadFile } from "./adminApi";
 import { ImagePicker, MultiImageField } from "./ImagePicker";
+import { toast } from "./toast";
 import { useAdminData } from "./hooks";
 import {
   DateTimeField,
@@ -110,6 +112,34 @@ const twoCol = "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]";
 
 /* ---------- Events ---------- */
 
+function FileUploadButton({ onUploaded }: { onUploaded: (url: string, name: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const onFile = async (file?: File) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const res = await uploadFile(file);
+      onUploaded(res.url, res.name);
+      toast.success("File uploaded");
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setBusy(false);
+      if (ref.current) ref.current.value = "";
+    }
+  };
+  return (
+    <div>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={() => ref.current?.click()} disabled={busy}>
+        {busy ? "Uploading…" : "Upload PDF / PPT"}
+      </button>
+      <span className="ml-2 text-[13px] text-dim">Up to 15 MB.</span>
+      <input ref={ref} type="file" accept={DOC_ACCEPT} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => void onFile(e.target.files?.[0])} />
+    </div>
+  );
+}
+
 export function EventForm({ draft, set, errors, isNew }: FormProps<ClubEvent>) {
   return (
     <div className={twoCol}>
@@ -163,6 +193,26 @@ export function EventForm({ draft, set, errors, isNew }: FormProps<ClubEvent>) {
         </Group>
         <Group title="Photos" description="Shown as a gallery on the event page.">
           <MultiImageField label="Event images" value={draft.images} onChange={(v) => set({ images: v })} error={errors.images} />
+        </Group>
+        <Group title="Resources" description="Slides, PDFs or links from the session, listed on the event page.">
+          <ListEditor
+            items={draft.resources}
+            onChange={(v) => set({ resources: v })}
+            blank={() => ({ label: "", url: "" })}
+            addLabel="Add resource"
+            itemName="resource"
+            max={20}
+            error={errors.resources}
+            render={(r, update, i) => (
+              <div className="flex flex-col gap-3">
+                <Grid>
+                  <TextField label="Label" value={r.label} onChange={(v) => update({ ...r, label: v })} error={errors[`resources.${i}.label`]} placeholder="Workshop slides" />
+                  <TextField label="URL" value={r.url} onChange={(v) => update({ ...r, url: v })} error={errors[`resources.${i}.url`]} placeholder="https://… or upload" inputMode="url" />
+                </Grid>
+                <FileUploadButton onUploaded={(url, name) => update({ label: r.label || name.replace(/\.[^.]+$/, ""), url })} />
+              </div>
+            )}
+          />
         </Group>
       </div>
       <div className="flex min-w-0 flex-col gap-6">
@@ -250,7 +300,7 @@ export function TeamForm({ draft, set, errors }: FormProps<TeamMember>) {
         <Group title="Member">
           <TextField label="Name" value={draft.name} onChange={(v) => set({ name: v })} error={errors.name} required maxLength={120} />
           <Grid>
-            <TextField label="Role" value={draft.role} onChange={(v) => set({ role: v })} error={errors.role} placeholder="e.g. President" maxLength={120} />
+            <TextField label="Role" value={draft.role} onChange={(v) => set({ role: v })} error={errors.role} placeholder="e.g. Lead" maxLength={120} />
             <TextField
               label="Group"
               value={draft.group}
@@ -262,11 +312,21 @@ export function TeamForm({ draft, set, errors }: FormProps<TeamMember>) {
             />
           </Grid>
           <datalist id="team-groups">
-            {["Faculty", "Leads", "Core", "Alumni"].map((g) => (
+            {[
+              "Faculty",
+              "Executive Board",
+              "Design & Hardware",
+              "Embedded",
+              "AI Programming & Research",
+              "Event Management & Discipline",
+              "PR, Sponsor & Outreach",
+              "IT, Media & Content",
+              "Alumni",
+            ].map((g) => (
               <option key={g} value={g} />
             ))}
           </datalist>
-          <TextArea label="Bio" value={draft.bio} onChange={(v) => set({ bio: v })} error={errors.bio} rows={4} maxLength={1000} optional />
+          <TextArea label="Bio" hint="Shown under the name, e.g. “CSE · 2nd year”." value={draft.bio} onChange={(v) => set({ bio: v })} error={errors.bio} rows={4} maxLength={1000} optional />
         </Group>
         <Group title="Profiles" description="Full URLs, e.g. https://linkedin.com/in/…">
           <TextField label="LinkedIn" value={draft.linkedin} onChange={(v) => set({ linkedin: v })} error={errors.linkedin} inputMode="url" optional />
@@ -279,7 +339,14 @@ export function TeamForm({ draft, set, errors }: FormProps<TeamMember>) {
           <Toggle label="Active" description="Show on the Team page." checked={draft.active} onChange={(v) => set({ active: v })} />
         </Group>
         <Group title="Photo">
-          <ImagePicker label="Portrait" value={draft.photo} onChange={(v) => set({ photo: v })} error={errors.photo} round />
+          <ImagePicker
+            label="Portrait"
+            value={draft.photo}
+            onChange={(v) => set({ photo: v })}
+            error={errors.photo}
+            round
+            hint="LinkedIn photo: on their profile, right-click the photo, Copy image address, paste it here and press Save a copy. LinkedIn links expire, so always save a copy."
+          />
         </Group>
       </div>
     </div>
@@ -371,7 +438,7 @@ export function PostForm({ draft, set, errors, isNew }: FormProps<Post>) {
         <Group title="Publishing">
           <Toggle label="Published" description="Visible on the public blog." checked={draft.published} onChange={(v) => set({ published: v })} />
           <DateTimeField label="Publish date" value={draft.publishedAt} onChange={(v) => v && set({ publishedAt: v })} error={errors.publishedAt} />
-          <TextField label="Author" value={draft.author} onChange={(v) => set({ author: v })} error={errors.author} optional maxLength={120} />
+          <TextField label="Author" value={draft.author} onChange={(v) => set({ author: v })} error={errors.author} optional maxLength={120} hint="Internal only. Author names are never shown on the site." />
         </Group>
         <Group title="Cover">
           <CoverFields cover={draft.cover} coverAlt={draft.coverAlt} set={set} errors={errors} />

@@ -1,13 +1,10 @@
 import { Link } from "react-router";
-import type { ClubEvent, ListResponse, Partner } from "@shared/types";
-import { useApi } from "@/lib/useApi";
+import type { Partner } from "@shared/types";
 import { useSite } from "@/lib/site";
 import { usePageMeta } from "@/lib/seo";
 import { safeHref } from "@/lib/format";
-import { EventCard } from "@/components/Cards";
 import { ArrowRight, ArrowUpRight, Instagram, LinkedIn } from "@/components/icons";
-import { CardSkeletons, ErrorState, PageHero, Reveal, SectionHeader, SmartLink } from "@/components/ui";
-import { ImageGrid } from "./_shared";
+import { PageHero, Reveal, SectionHeader, SmartLink } from "@/components/ui";
 
 function LogoTile({ src, alt, className = "h-28 w-28 sm:h-32 sm:w-32" }: { src: string; alt: string; className?: string }) {
   return (
@@ -49,32 +46,10 @@ function PartnerCard({ partner }: { partner: Partner }) {
   );
 }
 
-function SeriesSessions({ seriesKey, name }: { seriesKey: string; name: string }) {
-  const { data, error, loading, retry } = useApi<ListResponse<ClubEvent>>(`/api/events?series=${encodeURIComponent(seriesKey)}`);
-  if (loading) return <CardSkeletons count={2} aspect="4/5" />;
-  if (error) return <ErrorState error={error} onRetry={retry} compact />;
-  const items = data?.items ?? [];
-  if (!items.length) return null;
-  return (
-    <div>
-      <h3 className="title mb-6">{name} sessions</h3>
-      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((e) => (
-          <li key={e.id}>
-            <EventCard event={e} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export default function Collaborations() {
   const { settings, data } = useSite();
   const partners = data?.partners ?? [];
   usePageMeta("Collaborations", settings.collabIntro || undefined);
-  const paragraphs = settings.seriesBody.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
-  const links = settings.seriesLinks.filter((l) => safeHref(l.url));
 
   return (
     <>
@@ -130,43 +105,24 @@ export default function Collaborations() {
       )}
 
       {settings.seriesName && (
-        <section className="border-t border-line py-20 md:py-28" aria-labelledby="series-title">
-          <div className="container-x space-y-14 md:space-y-20">
-            <Reveal className="grid gap-8 md:grid-cols-12 md:gap-14">
-              <div className="md:col-span-5">
-                <p className="eyebrow mb-3">Workshop series</p>
-                <h2 id="series-title" className="display text-gradient">
-                  {settings.seriesName}
-                </h2>
-                {settings.seriesTagline && <p className="mt-4 text-[13px] font-semibold uppercase tracking-[0.18em] text-muted">{settings.seriesTagline}</p>}
-                {links.length > 0 && (
-                  <ul className="mt-8 flex flex-wrap gap-2">
-                    {links.map((l) => (
-                      <li key={l.url}>
-                        <SmartLink href={l.url} className="chip">
-                          {l.label} <ArrowUpRight size={14} />
-                        </SmartLink>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div className="space-y-5 text-[17px] leading-relaxed text-fg/85 md:col-span-7">
-                {paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-            </Reveal>
-
-            {settings.seriesKey && <SeriesSessions seriesKey={settings.seriesKey} name={settings.seriesName} />}
-
-            {settings.seriesImages.some(Boolean) && (
+        <section className="container-x pb-20 md:pb-28">
+          <Reveal>
+            <Link
+              to="/vortex"
+              className="card flex flex-col gap-6 p-8 transition-colors hover:border-line-strong sm:flex-row sm:items-center sm:justify-between sm:p-12"
+            >
               <div>
-                <h3 className="title mb-6">From the sessions</h3>
-                <ImageGrid images={settings.seriesImages} title={settings.seriesName} />
+                <p className="eyebrow mb-2">Our workshop series</p>
+                <p className="font-vortex vortex-word text-[clamp(2.5rem,8vw,4.5rem)] font-black leading-none tracking-[0.06em]">
+                  {settings.seriesName.toUpperCase()}
+                </p>
+                {settings.seriesTagline && <p className="mt-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-muted">{settings.seriesTagline}</p>}
               </div>
-            )}
-          </div>
+              <span className="btn btn-ghost shrink-0">
+                See every session <ArrowRight size={18} />
+              </span>
+            </Link>
+          </Reveal>
         </section>
       )}
 
@@ -175,7 +131,7 @@ export default function Collaborations() {
           <div className="max-w-xl">
             <h2 className="title">Want to work with us?</h2>
             <p className="mt-3 text-muted">
-              If you run a club, an IEEE chapter or a lab and want to plan a session with {settings.shortName}, write to us. Students can join the club any time
+              If you run a club, a society or a lab and want to plan a session with {settings.shortName}, write to us. Students can join the club any time
               sign-ups are open.
             </p>
           </div>

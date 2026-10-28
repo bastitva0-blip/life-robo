@@ -20,8 +20,9 @@ const STATIC_ROUTES: Record<string, { title: string; description?: string }> = {
   "/blog": { title: "Blog", description: "Notes and highlights from Life Robo sessions." },
   "/collaborations": {
     title: "Collaborations",
-    description: "Life Robo works with the IEEE Student Branch, FoET and IEEE Robotics and Automation Society on the Vortex workshop series and more.",
+    description: "The groups Life Robo works with.",
   },
+  "/vortex": { title: "Vortex", description: "Vortex: the robotics workshop series by Life Robo, FoET, University of Lucknow. Hands on × Minds on × Future ready." },
   "/join": { title: "Join", description: "Sign up to build robots with Life Robo." },
   "/contact": { title: "Contact", description: "Get in touch with Life Robo." },
 };
@@ -124,7 +125,7 @@ export async function resolveMeta(db: D1Database, path: string, settings: Settin
             headline: po.title,
             datePublished: po.publishedAt,
             image: abs(po.cover),
-            author: { "@type": "Organization", name: po.author || settings.shortName },
+            author: { "@type": "Organization", name: settings.shortName },
           },
         };
       }

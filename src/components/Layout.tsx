@@ -17,8 +17,9 @@ export const NAV = [
   { to: "/team", label: "Team" },
   { to: "/collaborations", label: "Collaborations" },
   { to: "/gallery", label: "Gallery" },
-  { to: "/vortex", label: "Vortex", vortex: true },
   { to: "/blog", label: "Blog" },
+  // Last item, right before the "Join the club" button.
+  { to: "/vortex", label: "Vortex", vortex: true },
 ];
 
 // Faculty of Engineering & Technology, University of Lucknow (new campus, Jankipuram Vistar).

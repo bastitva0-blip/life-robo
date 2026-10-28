@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Settings, SocialLinks } from "@shared/types";
+import type { Settings, SocialLinks, Track } from "@shared/types";
 import { ApiError, adminApi, errorMessage, fieldErrors } from "./adminApi";
 import { useAdminData } from "./hooks";
 import { ImagePicker, MultiImageField } from "./ImagePicker";
@@ -205,7 +205,7 @@ function SettingsEditor({ initial }: { initial: Settings }) {
             <ListEditor
               items={draft.tracks}
               onChange={(v) => set("tracks", v)}
-              blank={() => ({ title: "", description: "" })}
+              blank={(): Track => ({ title: "", description: "", image: "" })}
               addLabel="Add track"
               itemName="track"
               max={12}

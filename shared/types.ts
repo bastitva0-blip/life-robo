@@ -11,6 +11,7 @@ export interface Stat {
 export interface Track {
   title: string;
   description: string;
+  image?: string; // background photo for the card
 }
 
 export interface Step {

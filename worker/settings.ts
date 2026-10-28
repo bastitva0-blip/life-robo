@@ -28,7 +28,7 @@ export const settingsSchema = z.object({
   vision: text(1000),
   mission: text(1000),
   stats: z.array(z.object({ value: text(20), label: text(60) })).max(8),
-  tracks: z.array(z.object({ title: text(80), description: text(300) })).max(12),
+  tracks: z.array(z.object({ title: text(80), description: text(300), image: urlish.optional() })).max(12),
   process: z.array(z.object({ title: text(80), description: text(300) })).max(8),
   roboFacts: z.array(text(300)).max(40),
   importantLinks: z.array(z.object({ label: text(80), url: urlish })).max(12),

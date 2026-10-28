@@ -221,6 +221,13 @@ function SettingsEditor({ initial }: { initial: Settings }) {
                     rows={2}
                     maxLength={300}
                   />
+                  <ImagePicker
+                    label="Background photo"
+                    value={t.image ?? ""}
+                    onChange={(v) => update({ ...t, image: v })}
+                    error={err(`tracks.${i}.image`)}
+                    hint="Shown faintly behind the card on the home page. Leave empty to use the default photo."
+                  />
                 </div>
               )}
             />

@@ -142,10 +142,16 @@ const bentoSpans = [
   "md:col-span-3",
   "md:col-span-2",
 ];
+// Club photos used behind each "What we do" card when a track has no image of its own.
+const TRACK_PHOTOS = [
+  "/photos/social/ig-vortex-2026-10-03-13.webp",
+  "/photos/team-arduino-arm.jpg",
+  "/photos/team-line-final.jpg",
+  "/photos/social/ig-liferobo-2026-10-11-2.webp",
+];
 export function Tracks() {
-  const { settings, data } = useSite();
+  const { settings } = useSite();
   if (!settings.tracks.length) return null;
-  const bg = data?.gallery?.[0]?.url;
   return (
     <section className="py-24 md:py-36" aria-labelledby="tracks-title">
       <div className="container-x">
@@ -153,10 +159,10 @@ export function Tracks() {
         <div className="grid auto-rows-[minmax(220px,auto)] gap-4 md:grid-cols-6">
           {settings.tracks.map((t, i) => (
             <Reveal key={i} delay={i * 0.06} className={cx("card relative flex flex-col justify-end p-7 md:p-9", bentoSpans[i % bentoSpans.length])}>
-              {i === 0 && bg && (
+              {(t.image || TRACK_PHOTOS[i % TRACK_PHOTOS.length]) && (
                 <>
-                  <Img src={bg} alt="" className="!absolute inset-0 opacity-40" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" aria-hidden="true" />
+                  <Img src={t.image || TRACK_PHOTOS[i % TRACK_PHOTOS.length]} alt="" className="!absolute inset-0 opacity-40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/10" aria-hidden="true" />
                 </>
               )}
               <span className="absolute right-7 top-6 font-mono text-[13px] text-dim">0{i + 1}</span>

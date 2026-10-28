@@ -136,9 +136,9 @@ export default function Collaborations() {
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
-            <Link to="/contact" className="btn btn-primary">
+            <a href="#contact" className="btn btn-primary">
               Get in touch <ArrowRight size={18} />
-            </Link>
+            </a>
             <Link to="/join" className="btn btn-ghost">
               Join the club
             </Link>

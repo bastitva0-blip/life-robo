@@ -17,10 +17,16 @@ export const NAV = [
   { to: "/team", label: "Team" },
   { to: "/collaborations", label: "Collaborations" },
   { to: "/gallery", label: "Gallery" },
-  { to: "/blog", label: "Blog" },
   { to: "/vortex", label: "Vortex", vortex: true },
-  { to: "/contact", label: "Contact" },
+  { to: "/blog", label: "Blog" },
 ];
+
+// Faculty of Engineering & Technology, University of Lucknow (new campus, Jankipuram Vistar).
+const LAT = 26.9258;
+const LON = 80.9418;
+const D = 0.008;
+const MAP_EMBED = `https://www.openstreetmap.org/export/embed.html?bbox=${LON - D}%2C${LAT - D / 2}%2C${LON + D}%2C${LAT + D / 2}&layer=mapnik&marker=${LAT}%2C${LON}`;
+const MAP_LINK = `https://www.openstreetmap.org/search?query=${encodeURIComponent("Faculty of Engineering and Technology, University of Lucknow")}`;
 
 /* ---------------- Top strip (event alert or default join call-to-action) ---------------- */
 
@@ -293,12 +299,19 @@ export function Socials({ socials, className }: { socials: SocialLinks; classNam
 
 function Footer() {
   const { settings } = useSite();
+  const { hash, pathname } = useLocation();
+  // "Contact" lives in the footer on every page; /#contact and the old /contact URL scroll here.
+  useEffect(() => {
+    if (hash !== "#contact") return;
+    const t = window.setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }), 80);
+    return () => window.clearTimeout(t);
+  }, [hash, pathname]);
   const year = new Date().getFullYear();
   const important = (settings.importantLinks?.length ? settings.importantLinks : DEFAULT_SETTINGS.importantLinks).filter((l) =>
     safeHref(l.url),
   );
   return (
-    <footer className="border-t border-line bg-ink" aria-labelledby="footer-title">
+    <footer id="contact" className="scroll-mt-16 border-t border-line bg-ink" aria-labelledby="footer-title">
       <div className="container-x grid gap-12 py-16 md:grid-cols-12 md:py-20">
         <div className="md:col-span-5">
           <h2 id="footer-title" className="flex items-center gap-4">
@@ -310,22 +323,11 @@ function Footer() {
           </h2>
           <p className="mt-6 max-w-sm text-[15px] text-muted">{settings.mission || settings.heroSubhead}</p>
           <Socials socials={settings.socials} className="mt-6" />
-          <address className="mt-6 text-[14px] not-italic leading-relaxed text-dim">
-            {settings.address}
-            {settings.contactEmail && (
-              <>
-                <br />
-                <a className="link" href={`mailto:${settings.contactEmail}`}>
-                  {settings.contactEmail}
-                </a>
-              </>
-            )}
-          </address>
         </div>
         <nav className="md:col-span-3 md:col-start-7" aria-label="Quick links">
           <p className="eyebrow mb-4">Quick links</p>
           <ul className="space-y-3 text-[15px]">
-            {[{ to: "/", label: "Home" }, ...NAV, { to: "/join", label: "Join the club" }].map((n) => (
+            {[{ to: "/", label: "Home" }, ...NAV, { to: "/join", label: "Join the club" }, { to: "#contact", label: "Contact" }].map((n) => (
               <li key={n.to}>
                 <Link to={n.to} className="text-muted hover:text-fg">
                   {n.label}
@@ -350,6 +352,37 @@ function Footer() {
           </nav>
         )}
       </div>
+      <section className="container-x grid gap-6 pb-16 md:grid-cols-12 md:pb-20" aria-labelledby="contact-title">
+        <div className="md:col-span-5">
+          <h2 id="contact-title" className="eyebrow mb-4">
+            Contact
+          </h2>
+          <p className="max-w-sm text-[15px] text-muted">Questions about joining, collaborating or sponsoring an event? We would love to hear from you.</p>
+          {settings.contactEmail && (
+            <a href={`mailto:${settings.contactEmail}`} className="link mt-5 flex items-center gap-2 break-all text-[17px] font-medium">
+              <Mail size={18} /> {settings.contactEmail}
+            </a>
+          )}
+          {settings.address && <address className="mt-5 max-w-sm text-[15px] not-italic leading-relaxed text-fg/85">{settings.address}</address>}
+          <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" className="link mt-3 text-[14px]">
+            Open in OpenStreetMap <ArrowUpRight size={14} />
+          </a>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/join" className="btn btn-primary btn-sm">
+              {settings.joinOpen ? "Join the club" : "Membership info"} <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+        <div className="card relative min-h-[240px] md:col-span-7 md:min-h-[280px]">
+          <iframe
+            title="Map: Faculty of Engineering and Technology, University of Lucknow"
+            src={MAP_EMBED}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="absolute inset-0 h-full w-full border-0 [filter:invert(0.92)_hue-rotate(180deg)_saturate(0.7)_brightness(0.95)]"
+          />
+        </div>
+      </section>
       <div className="border-t border-line">
         <div className="container-x flex flex-col gap-2 py-6 text-[12px] text-dim sm:flex-row sm:justify-between">
           <p>© {year} Life Robo, University of Lucknow</p>

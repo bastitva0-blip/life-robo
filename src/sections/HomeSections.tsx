@@ -461,7 +461,7 @@ export function JoinCta() {
           <Link to="/join" className="btn btn-primary">
             {settings.joinOpen ? "Apply to join" : "Register interest"} <ArrowRight size={18} />
           </Link>
-          <Link to="/contact" className="btn btn-secondary">Talk to us</Link>
+          <a href="#contact" className="btn btn-secondary">Talk to us</a>
         </div>
       </Reveal>
     </section>

@@ -24,7 +24,6 @@ const STATIC_ROUTES: Record<string, { title: string; description?: string }> = {
   },
   "/vortex": { title: "Vortex", description: "Vortex: the robotics workshop series by Life Robo, FoET, University of Lucknow. Hands on × Minds on × Future ready." },
   "/join": { title: "Join", description: "Sign up to build robots with Life Robo." },
-  "/contact": { title: "Contact", description: "Get in touch with Life Robo." },
 };
 
 const stripMd = (s: string) =>

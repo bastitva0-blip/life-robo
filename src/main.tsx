@@ -1,6 +1,6 @@
 import { StrictMode, Suspense, lazy, useState, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter } from "react-router";
+import { Navigate, createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import "./index.css";
 import { SiteProvider, preloadSite } from "@/lib/site";
@@ -64,7 +64,8 @@ const router = createBrowserRouter([
       { path: "blog", lazy: page(() => import("@/pages/Blog")) },
       { path: "blog/:slug", lazy: page(() => import("@/pages/PostDetail")) },
       { path: "join", lazy: page(() => import("@/pages/Join")) },
-      { path: "contact", lazy: page(() => import("@/pages/Contact")) },
+      // Contact moved into the footer; keep the old URL working.
+      { path: "contact", element: <Navigate to="/#contact" replace /> },
       { path: "*", lazy: page(() => import("@/pages/NotFound")) },
     ],
   },

@@ -27,8 +27,8 @@ const GROUP_TITLES: Record<string, string> = {
   "pr, sponsor & outreach": "PR, Sponsor & Outreach team",
   "it, media & content": "IT, Media & Content team",
 };
-// Groups shown with large cards; every other group uses the denser grid.
-const FEATURED = new Set(["faculty", "executive board"]);
+// Group shown with large cards; every other group (faculty included) uses the denser grid.
+const FEATURED = new Set(["executive board"]);
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);

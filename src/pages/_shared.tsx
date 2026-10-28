@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { ApiError } from "@/lib/api";
 import { renderMarkdown } from "@/lib/markdown";
 import { ChevronLeft } from "@/components/icons";
-import { Img, Skeleton } from "@/components/ui";
+import { Skeleton } from "@/components/ui";
 import { Lightbox, type LightboxItem } from "./_Lightbox";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -62,16 +62,23 @@ export function ImageGrid({ images, title }: { images: string[]; title: string }
   if (!items.length) return null;
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+      {/* Masonry columns keep each photo's own shape, so group photos are never cropped. */}
+      <ul className="columns-2 gap-3 sm:gap-4 md:columns-3">
         {items.map((it, i) => (
-          <li key={it.src + i}>
+          <li key={it.src + i} className="mb-3 break-inside-avoid sm:mb-4">
             <button
               type="button"
               onClick={() => setOpen(i)}
-              className="group block w-full overflow-hidden rounded-[20px]"
+              className="group block w-full overflow-hidden rounded-[20px] border border-line bg-elev"
               aria-label={`Open ${it.alt}`}
             >
-              <Img src={it.src} alt="" aspect="1/1" imgClassName="group-hover:scale-[1.04]" />
+              <img
+                src={it.src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.03]"
+              />
             </button>
           </li>
         ))}

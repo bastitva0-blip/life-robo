@@ -3,6 +3,8 @@ import { NavLink, Outlet, useLocation } from "react-router";
 import { cx } from "@/lib/format";
 import { Badge } from "@/components/Brand";
 import { ArrowUpRight, Close, Menu } from "@/components/icons";
+import type { AdminSection } from "@shared/types";
+import { useAccess } from "./access";
 
 const I = ({ d }: { d: ReactNode }) => (
   <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -10,34 +12,37 @@ const I = ({ d }: { d: ReactNode }) => (
   </svg>
 );
 
-const SECTIONS: { to: string; label: string; color: string; icon: ReactNode; end?: boolean }[] = [
+const SECTIONS: { to: string; label: string; color: string; icon: ReactNode; end?: boolean; section?: AdminSection | "developer" }[] = [
   { to: "/admin", label: "Dashboard", color: "#636366", end: true, icon: <I d={<><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>} /> },
-  { to: "/admin/alerts", label: "Alert banner", color: "#ff453a", icon: <I d={<><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z" /><path d="M16 8a5 5 0 0 1 0 8" /><path d="M19 5a9 9 0 0 1 0 14" /></>} /> },
-  { to: "/admin/content", label: "Site content", color: "#0a84ff", icon: <I d={<><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></>} /> },
-  { to: "/admin/events", label: "Events", color: "#ff9f0a", icon: <I d={<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>} /> },
-  { to: "/admin/projects", label: "Projects", color: "#30d158", icon: <I d={<><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></>} /> },
-  { to: "/admin/team", label: "Team", color: "#5e5ce6", icon: <I d={<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6" /></>} /> },
-  { to: "/admin/gallery", label: "Gallery", color: "#bf5af2", icon: <I d={<><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 16-5-5-9 9" /></>} /> },
-  { to: "/admin/blog", label: "Blog", color: "#64d2ff", icon: <I d={<><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>} /> },
-  { to: "/admin/attendance", label: "Attendance", color: "#34c759", icon: <I d={<><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></>} /> },
-  { to: "/admin/partners", label: "Partners", color: "#ff9500", icon: <I d={<><path d="M8 12h8" /><path d="M9 7H7a5 5 0 0 0 0 10h2" /><path d="M15 7h2a5 5 0 0 1 0 10h-2" /></>} /> },
-  { to: "/admin/signups", label: "Signups", color: "#ff375f", icon: <I d={<><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z" /></>} /> },
-  { to: "/admin/media", label: "Media library", color: "#ac8e68", icon: <I d={<><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></>} /> },
+  { to: "/admin/alerts", section: "alerts", label: "Alert banner", color: "#ff453a", icon: <I d={<><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z" /><path d="M16 8a5 5 0 0 1 0 8" /><path d="M19 5a9 9 0 0 1 0 14" /></>} /> },
+  { to: "/admin/content", section: "content", label: "Site content", color: "#0a84ff", icon: <I d={<><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></>} /> },
+  { to: "/admin/events", section: "events", label: "Events", color: "#ff9f0a", icon: <I d={<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>} /> },
+  { to: "/admin/projects", section: "projects", label: "Projects", color: "#30d158", icon: <I d={<><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></>} /> },
+  { to: "/admin/team", section: "team", label: "Team", color: "#5e5ce6", icon: <I d={<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6" /></>} /> },
+  { to: "/admin/gallery", section: "gallery", label: "Gallery", color: "#bf5af2", icon: <I d={<><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 16-5-5-9 9" /></>} /> },
+  { to: "/admin/blog", section: "blog", label: "Blog", color: "#64d2ff", icon: <I d={<><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>} /> },
+  { to: "/admin/attendance", section: "attendance", label: "Attendance", color: "#34c759", icon: <I d={<><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></>} /> },
+  { to: "/admin/quizzes", section: "quizzes", label: "Quizzes", color: "#ffd60a", icon: <I d={<><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14" /><path d="M12 17.5h.01" /></>} /> },
+  { to: "/admin/partners", section: "partners", label: "Partners", color: "#ff9500", icon: <I d={<><path d="M8 12h8" /><path d="M9 7H7a5 5 0 0 0 0 10h2" /><path d="M15 7h2a5 5 0 0 1 0 10h-2" /></>} /> },
+  { to: "/admin/signups", section: "signups", label: "Signups", color: "#ff375f", icon: <I d={<><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z" /></>} /> },
+  { to: "/admin/roles", section: "developer", label: "Roles", color: "#8e8e93", icon: <I d={<><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /><path d="M12 15v2" /></>} /> },
+  { to: "/admin/media", section: "media", label: "Media library", color: "#ac8e68", icon: <I d={<><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></>} /> },
 ];
 
 function Sidebar({ onLogout, onNavigate }: { onLogout: () => void; onNavigate?: () => void }) {
+  const { can, me } = useAccess();
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 px-4 pb-4 pt-5">
         <Badge size={36} />
         <div className="min-w-0">
           <p className="truncate text-[15px] font-semibold leading-tight">Life Robo</p>
-          <p className="text-[12px] text-dim">Admin</p>
+          <p className="truncate text-[12px] text-dim">Admin · {me?.role.name ?? ""}</p>
         </div>
       </div>
       <nav aria-label="Admin sections" className="min-h-0 flex-1 overflow-y-auto px-2.5">
         <ul className="flex flex-col gap-0.5">
-          {SECTIONS.map((s) => (
+          {SECTIONS.filter((s) => !s.section || can(s.section)).map((s) => (
             <li key={s.to}>
               <NavLink
                 to={s.to}

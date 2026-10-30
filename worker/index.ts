@@ -3,7 +3,9 @@ import { z } from "zod";
 import type { Signup } from "@shared/types";
 import type { AppEnv } from "./env";
 import { attendance } from "./attendance";
-import { clearSession, hashIp, issueSession, requireAdmin, safeEqual, sameOrigin } from "./auth";
+import { quizzes } from "./quizzes";
+import { roles } from "./roles";
+import { clearSession, findRoleByPassword, hashIp, issueSession, requireAdmin, sameOrigin } from "./auth";
 import {
   getEvent,
   getPost,
@@ -165,7 +167,8 @@ app.post("/api/admin/login", async (c) => {
   const password = typeof body?.password === "string" ? body.password : "";
   if (!c.env.ADMIN_PASSWORD) return c.json({ error: "Admin password is not configured" }, 500);
 
-  if (!(await safeEqual(password, c.env.ADMIN_PASSWORD))) {
+  const role = await findRoleByPassword(c.env, password);
+  if (!role) {
     await db.batch([
       db.prepare("INSERT INTO login_attempts (ip_hash) VALUES (?1)").bind(ip),
       db.prepare("DELETE FROM login_attempts WHERE created_at < ?1").bind(new Date(Date.now() - 86400_000).toISOString()),
@@ -173,7 +176,7 @@ app.post("/api/admin/login", async (c) => {
     return c.json({ error: "Incorrect password" }, 401);
   }
   await db.prepare("DELETE FROM login_attempts WHERE ip_hash = ?1").bind(ip).run();
-  await issueSession(c);
+  await issueSession(c, role);
   return c.json({ ok: true });
 });
 
@@ -189,7 +192,14 @@ app.use("/api/admin/*", async (c, next) => {
   return requireAdmin(c, next);
 });
 
-app.get("/api/admin/me", (c) => c.json({ ok: true }));
+app.get("/api/admin/me", (c) => {
+  const { key, name, developer, permissions } = c.get("admin");
+  return c.json({ role: { key, name }, developer, permissions });
+});
+
+// Admin roles (developer only) and workshop quizzes. Must stay above the generic CRUD routes.
+app.route("/", roles);
+app.route("/", quizzes);
 
 // Event registration, certificates (public) and attendance (admin). Must stay above the generic CRUD routes.
 app.route("/", attendance);

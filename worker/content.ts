@@ -31,7 +31,10 @@ export function listEvents(db: D1Database, status?: string, series?: string): Pr
 
 export async function getEvent(db: D1Database, slug: string): Promise<ClubEvent | null> {
   const rows = await all<ClubEvent>(db, "events", "SELECT * FROM events WHERE slug = ?1 AND published = 1", slug);
-  return rows[0] ?? null;
+  const event = rows[0];
+  if (!event) return null;
+  const quiz = await db.prepare("SELECT 1 FROM quizzes WHERE event_id = ?1 AND open = 1 AND questions <> '[]'").bind(event.id).first();
+  return { ...event, quizOpen: !!quiz };
 }
 
 export function listProjects(db: D1Database, category?: string): Promise<Project[]> {

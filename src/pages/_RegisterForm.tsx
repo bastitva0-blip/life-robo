@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { ClubEvent, RegistrationInput } from "@shared/types";
 import { ApiError, api } from "@/lib/api";
 import { cx } from "@/lib/format";
@@ -24,7 +24,7 @@ const inputCls =
   "w-full rounded-2xl border bg-elev-2 px-4 py-3 text-[17px] text-fg placeholder:text-dim transition-[border-color,box-shadow] duration-200 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/25";
 
 /** On-site registration for one event. Confirmation goes out by email from the Worker. */
-export function RegisterForm({ event }: { event: ClubEvent }) {
+export function RegisterForm({ event, aside }: { event: ClubEvent; aside?: ReactNode }) {
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<Values>(EMPTY);
@@ -172,18 +172,21 @@ export function RegisterForm({ event }: { event: ClubEvent }) {
         <label htmlFor={`${uid}-website`}>Website</label>
         <input id={`${uid}-website`} type="text" name="website" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
       </div>
-      <button type="submit" className="btn btn-primary w-full disabled:opacity-60 sm:w-auto" disabled={busy}>
-        {busy ? (
-          <>
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none" aria-hidden="true" />
-            Registering…
-          </>
-        ) : (
-          <>
-            Register <ArrowRight size={18} />
-          </>
-        )}
-      </button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button type="submit" className="btn btn-primary w-full disabled:opacity-60 sm:w-auto" disabled={busy}>
+          {busy ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none" aria-hidden="true" />
+              Registering…
+            </>
+          ) : (
+            <>
+              Register <ArrowRight size={18} />
+            </>
+          )}
+        </button>
+        {aside}
+      </div>
     </form>
   );
 }

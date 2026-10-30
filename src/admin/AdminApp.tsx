@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import type { AdminMe, AdminSection } from "@shared/types";
+import { AccessContext, useAccess } from "./access";
 import { Link, Route, Routes } from "react-router";
 import { Collection } from "./Collection";
+import QuizzesPage from "./QuizzesPage";
+import RolesPage from "./RolesPage";
 import { ApiError, UNAUTHORIZED_EVENT, adminApi } from "./adminApi";
 import AttendancePage from "./AttendancePage";
 import { alertsConfig, eventsConfig, galleryConfig, partnersConfig, postsConfig, projectsConfig, teamConfig } from "./configs";
@@ -37,16 +41,38 @@ function useNoIndex() {
   }, []);
 }
 
+/** Shows the page only to roles that may open it. The Worker enforces the same rules. */
+function Gate({ section, children }: { section: AdminSection | "developer"; children: ReactNode }) {
+  const { can, me } = useAccess();
+  if (can(section)) return children;
+  return (
+    <Empty
+      title="No access"
+      body={`The ${me?.role.name ?? "current"} role can't open this section. Ask the developer to give it access.`}
+      action={
+        <Link to="/admin" className="btn btn-ghost btn-sm">
+          Go to dashboard
+        </Link>
+      }
+    />
+  );
+}
+
 export default function AdminApp() {
   useNoIndex();
   const [auth, setAuth] = useState<Auth>("checking");
   const [attempt, setAttempt] = useState(0);
+  const [me, setMe] = useState<AdminMe | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     adminApi
-      .get("/api/admin/me")
-      .then(() => !cancelled && setAuth("in"))
+      .get<AdminMe>("/api/admin/me")
+      .then((res) => {
+        if (cancelled) return;
+        setMe(res);
+        setAuth("in");
+      })
       .catch((err) => {
         if (cancelled) return;
         setAuth(err instanceof ApiError && err.status === 401 ? "out" : "offline");
@@ -103,23 +129,33 @@ export default function AdminApp() {
       </div>
     );
   } else if (auth !== "in") {
-    body = <Login expired={auth === "expired"} onSuccess={() => setAuth("in")} />;
+    body = (
+      <Login
+        expired={auth === "expired"}
+        onSuccess={() => {
+          setAuth("checking");
+          setAttempt((n) => n + 1);
+        }}
+      />
+    );
   } else {
     body = (
       <Routes>
         <Route element={<Shell onLogout={() => void logout()} />}>
           <Route index element={<Dashboard />} />
-          <Route path="alerts/*" element={<Collection key="alerts" config={alertsConfig} />} />
-          <Route path="content" element={<SettingsPage />} />
-          <Route path="events/*" element={<Collection key="events" config={eventsConfig} />} />
-          <Route path="projects/*" element={<Collection key="projects" config={projectsConfig} />} />
-          <Route path="team/*" element={<Collection key="team" config={teamConfig} />} />
-          <Route path="gallery/*" element={<Collection key="gallery" config={galleryConfig} />} />
-          <Route path="blog/*" element={<Collection key="blog" config={postsConfig} />} />
-          <Route path="partners/*" element={<Collection key="partners" config={partnersConfig} />} />
-          <Route path="attendance/*" element={<AttendancePage />} />
-          <Route path="signups" element={<SignupsPage />} />
-          <Route path="media" element={<MediaPage />} />
+          <Route path="alerts/*" element={<Gate section="alerts"><Collection key="alerts" config={alertsConfig} /></Gate>} />
+          <Route path="content" element={<Gate section="content"><SettingsPage /></Gate>} />
+          <Route path="events/*" element={<Gate section="events"><Collection key="events" config={eventsConfig} /></Gate>} />
+          <Route path="projects/*" element={<Gate section="projects"><Collection key="projects" config={projectsConfig} /></Gate>} />
+          <Route path="team/*" element={<Gate section="team"><Collection key="team" config={teamConfig} /></Gate>} />
+          <Route path="gallery/*" element={<Gate section="gallery"><Collection key="gallery" config={galleryConfig} /></Gate>} />
+          <Route path="blog/*" element={<Gate section="blog"><Collection key="blog" config={postsConfig} /></Gate>} />
+          <Route path="partners/*" element={<Gate section="partners"><Collection key="partners" config={partnersConfig} /></Gate>} />
+          <Route path="attendance/*" element={<Gate section="attendance"><AttendancePage /></Gate>} />
+          <Route path="quizzes/*" element={<Gate section="quizzes"><QuizzesPage /></Gate>} />
+          <Route path="roles" element={<Gate section="developer"><RolesPage /></Gate>} />
+          <Route path="signups" element={<Gate section="signups"><SignupsPage /></Gate>} />
+          <Route path="media" element={<Gate section="media"><MediaPage /></Gate>} />
           <Route
             path="*"
             element={
@@ -140,9 +176,9 @@ export default function AdminApp() {
   }
 
   return (
-    <>
+    <AccessContext.Provider value={auth === "in" ? me : null}>
       {body}
       <Toaster />
-    </>
+    </AccessContext.Provider>
   );
 }

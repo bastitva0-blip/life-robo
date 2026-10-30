@@ -78,6 +78,16 @@ export async function resolveMeta(db: D1Database, path: string, settings: Settin
     return { ...base, title: `Certificate${suffix}`, description: `Certificate of participation issued by ${settings.shortName}.`, noindex: true };
   }
 
+  if (/^\/badges\/[A-Za-z0-9-]{1,20}$/.test(p)) {
+    return { ...base, title: `Quiz badge${suffix}`, description: `Workshop quiz badge issued by ${settings.shortName}.`, noindex: true };
+  }
+
+  const quiz = p.match(/^\/events\/([a-z0-9-]+)\/quiz$/);
+  if (quiz) {
+    const e = await getEvent(db, quiz[1]);
+    if (e) return { ...base, title: `${e.title} quiz${suffix}`, description: `Take the quiz for ${e.title} and get your badge.`, image: e.cover || base.image, noindex: true };
+  }
+
   const m = p.match(/^\/(events|projects|blog)\/([a-z0-9-]+)$/);
   if (m) {
     const [, kind, slug] = m;

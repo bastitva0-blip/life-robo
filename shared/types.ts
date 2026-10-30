@@ -110,6 +110,7 @@ export interface ClubEvent {
   featured: boolean;
   published: boolean;
   status: EventStatus; // computed server-side from dates
+  quizOpen?: boolean; // event detail only: a quiz is open for this event
   createdAt: ISODate;
   updatedAt: ISODate;
 }
@@ -309,3 +310,107 @@ export interface UploadResponse {
 export type Editable<T> = Omit<T, "id" | "createdAt" | "updatedAt" | "status">;
 
 export type AdminTable = "events" | "projects" | "team" | "gallery" | "posts" | "alerts" | "partners";
+
+/* ---------- Quizzes ---------- */
+
+export interface QuizQuestion {
+  q: string;
+  options: string[];
+  answer: number; // index into options; never sent to the public
+}
+
+/** Admin view of a quiz, one per event. */
+export interface Quiz {
+  id: number;
+  eventId: number;
+  title: string;
+  intro: string;
+  questions: QuizQuestion[];
+  passPercent: number;
+  open: boolean;
+  updatedAt: ISODate;
+}
+
+export interface QuizEventSummary {
+  eventId: number;
+  slug: string;
+  title: string;
+  startsAt: ISODate;
+  series: string;
+  quizId: number | null;
+  open: boolean;
+  questions: number;
+  attempts: number;
+}
+
+export interface QuizAttempt {
+  id: number;
+  name: string;
+  email: string;
+  score: number;
+  total: number;
+  code: string;
+  createdAt: ISODate;
+}
+
+/** What a participant sees: questions without answers. */
+export interface PublicQuiz {
+  title: string;
+  intro: string;
+  passPercent: number;
+  questions: { q: string; options: string[] }[];
+  event: { title: string; slug: string; startsAt: ISODate };
+}
+
+export interface QuizResult {
+  code: string;
+  score: number;
+  total: number;
+  passed: boolean;
+  /** Correct option per question, shown after submitting. */
+  answers: number[];
+}
+
+export interface QuizBadge {
+  code: string;
+  name: string;
+  score: number;
+  total: number;
+  passed: boolean;
+  issuedAt: ISODate;
+  event: { title: string; slug: string; startsAt: ISODate; series: string };
+}
+
+/* ---------- Admin roles ---------- */
+
+export const ADMIN_SECTIONS = [
+  { key: "alerts", label: "Alert banner" },
+  { key: "content", label: "Site content" },
+  { key: "events", label: "Events" },
+  { key: "projects", label: "Projects" },
+  { key: "team", label: "Team" },
+  { key: "gallery", label: "Gallery" },
+  { key: "blog", label: "Blog" },
+  { key: "partners", label: "Partners" },
+  { key: "attendance", label: "Attendance" },
+  { key: "quizzes", label: "Quizzes" },
+  { key: "signups", label: "Signups" },
+  { key: "media", label: "Media library" },
+] as const;
+
+export type AdminSection = (typeof ADMIN_SECTIONS)[number]["key"];
+
+export interface AdminMe {
+  role: { key: string; name: string };
+  developer: boolean;
+  permissions: AdminSection[];
+}
+
+export interface AdminRole {
+  id: number;
+  key: string;
+  name: string;
+  developer: boolean;
+  hasPassword: boolean;
+  permissions: AdminSection[];
+}

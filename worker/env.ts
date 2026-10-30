@@ -1,3 +1,5 @@
+import type { AdminSection } from "@shared/types";
+
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
@@ -11,4 +13,12 @@ export interface Env {
   MAIL_REPLY_TO?: string;
 }
 
-export type AppEnv = { Bindings: Env };
+/** A signed-in admin: the role they used and what it may open. Set by requireAdmin. */
+export interface AdminSession {
+  key: string;
+  name: string;
+  developer: boolean;
+  permissions: AdminSection[];
+}
+
+export type AppEnv = { Bindings: Env; Variables: { admin: AdminSession } };

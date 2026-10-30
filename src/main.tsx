@@ -47,6 +47,12 @@ const router = createBrowserRouter([
     HydrateFallback: Blank,
   },
   {
+    path: "/badges/:code",
+    lazy: page(() => import("@/pages/Badge")),
+    errorElement: <RootError />,
+    HydrateFallback: Blank,
+  },
+  {
     path: "/",
     Component: SiteLayout,
     errorElement: <RootError />,
@@ -55,6 +61,7 @@ const router = createBrowserRouter([
       { index: true, Component: HomePage },
       { path: "events", lazy: page(() => import("@/pages/Events")) },
       { path: "events/:slug", lazy: page(() => import("@/pages/EventDetail")) },
+      { path: "events/:slug/quiz", lazy: page(() => import("@/pages/Quiz")) },
       { path: "projects", lazy: page(() => import("@/pages/Projects")) },
       { path: "projects/:slug", lazy: page(() => import("@/pages/ProjectDetail")) },
       { path: "team", lazy: page(() => import("@/pages/Team")) },

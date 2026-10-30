@@ -39,7 +39,7 @@ export default function Login({ onSuccess, expired }: { onSuccess: () => void; e
         <div className="mb-8 flex flex-col items-center text-center">
           <Badge size={72} />
           <h1 className="mt-5 text-[26px] font-semibold tracking-[-0.02em]">Life Robo Admin</h1>
-          <p className="mt-1 text-[15px] text-muted">Sign in to manage the club website.</p>
+          <p className="mt-1 text-[15px] text-muted">Sign in with your role's password.</p>
         </div>
         <form onSubmit={submit} className="rounded-[22px] border border-line bg-elev p-5 shadow-2xl sm:p-6" noValidate>
           {expired && !error && (

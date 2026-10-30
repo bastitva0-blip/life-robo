@@ -78,6 +78,12 @@ export const Grip = (p: P) => (
 export const Check = (p: P) => (
   <svg {...base(p)}><path d="m5 12 5 5 9-10" /></svg>
 );
+export const Share = (p: P) => (
+  <svg {...base(p)}><path d="M12 15V3M7 8l5-5 5 5" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></svg>
+);
+export const Download = (p: P) => (
+  <svg {...base(p)}><path d="M12 3v12M7 10l5 5 5-5" /><path d="M5 21h14" /></svg>
+);
 export const ExternalLink = ArrowUpRight;
 
 /* Brand glyphs (filled) */

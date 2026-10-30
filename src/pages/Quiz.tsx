@@ -8,6 +8,7 @@ import { cx } from "@/lib/format";
 import { ArrowRight, Check, Close } from "@/components/icons";
 import { ErrorState, Skeleton } from "@/components/ui";
 import { ShareButton } from "@/components/ShareButton";
+import { QrButton } from "@/components/QrButton";
 import NotFound from "./NotFound";
 import { BackLink, DetailShell, is404 } from "./_shared";
 
@@ -45,12 +46,15 @@ export default function QuizPage() {
 
 function ShareQuiz({ quiz, slug }: { quiz: PublicQuiz; slug: string }) {
   return (
-    <ShareButton
-      title={quiz.title}
-      text={`${quiz.title}\nAttended ${quiz.event.title}? Take the quiz and get your badge.`}
-      url={`${window.location.origin}/events/${slug}/quiz`}
-      className="btn-sm"
-    />
+    <span className="flex flex-wrap gap-2">
+      <ShareButton
+        title={quiz.title}
+        text={`${quiz.title}\nAttended ${quiz.event.title}? Take the quiz and get your badge.`}
+        url={`${window.location.origin}/events/${slug}/quiz`}
+        className="btn-sm"
+      />
+      <QrButton path={`/events/${slug}/quiz`} title={quiz.title} fileName={`${slug}-quiz`} className="btn-sm" />
+    </span>
   );
 }
 

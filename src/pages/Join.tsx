@@ -8,6 +8,8 @@ import { cx } from "@/lib/format";
 import { Socials } from "@/components/Layout";
 import { ArrowRight, Check } from "@/components/icons";
 import { EmptyState, PageHero, Reveal } from "@/components/ui";
+import { QrButton } from "@/components/QrButton";
+import { ShareButton } from "@/components/ShareButton";
 import { EMPTY_STUDENT, STUDENT_FIELDS, studentPayload, validateStudent, type StudentField, type StudentValues } from "@/lib/student";
 import { StudentFields } from "./_StudentFields";
 
@@ -288,6 +290,16 @@ export default function Join() {
                   </button>
                 </div>
               </form>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <span className="text-[14px] text-dim">Bring a friend:</span>
+                <ShareButton
+                  title="Join Life Robo"
+                  text="Join Life Robo, the robotics club at FoET, University of Lucknow."
+                  url={`${window.location.origin}/join`}
+                  className="btn-sm"
+                />
+                <QrButton path="/join" title="Join Life Robo" fileName="life-robo-join" className="btn-sm" />
+              </div>
             </Reveal>
           )}
         </div>

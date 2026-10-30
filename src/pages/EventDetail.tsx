@@ -5,6 +5,7 @@ import { usePageMeta } from "@/lib/seo";
 import { fmtDate, fmtTime, safeHref } from "@/lib/format";
 import { ArrowRight, ArrowUpRight, Calendar, Clock, Pin } from "@/components/icons";
 import { ShareButton } from "@/components/ShareButton";
+import { QrButton } from "@/components/QrButton";
 import { ErrorState, Img, Reveal, SmartLink } from "@/components/ui";
 import NotFound from "./NotFound";
 import { BackLink, DetailShell, DetailSkeleton, ImageGrid, Markdown, is404 } from "./_shared";
@@ -29,13 +30,15 @@ export default function EventDetail() {
   if (error && is404(error)) return <NotFound what="event" />;
 
   const share = event && (
-    <ShareButton
-      title={event.title}
-      text={`${event.title}
-${whenText(event)}`}
-      url={`${window.location.origin}/events/${event.slug}`}
-      className="w-full sm:w-auto"
-    />
+    <>
+      <ShareButton
+        title={event.title}
+        text={`${event.title}\n${whenText(event)}`}
+        url={`${window.location.origin}/events/${event.slug}`}
+        className="w-full sm:w-auto"
+      />
+      <QrButton path={`/events/${event.slug}`} title={event.title} fileName={event.slug} className="w-full sm:w-auto" />
+    </>
   );
 
   return (

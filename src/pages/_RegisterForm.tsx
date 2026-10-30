@@ -3,20 +3,22 @@ import type { ClubEvent, RegistrationInput } from "@shared/types";
 import { ApiError, api } from "@/lib/api";
 import { cx } from "@/lib/format";
 import { ArrowRight, Check } from "@/components/icons";
+import { EMPTY_STUDENT, STUDENT_FIELDS, studentPayload, validateStudent, type StudentField, type StudentValues } from "@/lib/student";
+import { StudentFields } from "./_StudentFields";
 
-type Field = "name" | "email" | "phone" | "course";
-type Values = Record<Field, string>;
+type Field = "name" | "email" | "expectations" | StudentField;
+type Values = StudentValues & { name: string; email: string; expectations: string };
 type Errors = Partial<Record<Field, string>>;
 
-const FIELDS: Field[] = ["name", "email", "phone", "course"];
-const EMPTY: Values = { name: "", email: "", phone: "", course: "" };
+const FIELDS: Field[] = ["name", "email", ...STUDENT_FIELDS, "expectations"];
+const EMPTY: Values = { name: "", email: "", expectations: "", ...EMPTY_STUDENT };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function validate(v: Values): Errors {
-  const e: Errors = {};
+  const e: Errors = validateStudent(v);
   if (v.name.trim().length < 2) e.name = "Please enter your name.";
   if (!EMAIL_RE.test(v.email.trim())) e.email = "Please enter a valid email address.";
-  if (v.phone && !/^[0-9+\-\s()]*$/.test(v.phone)) e.phone = "Use digits, spaces, +, - or brackets only.";
+  if (v.expectations.trim().length > 1000) e.expectations = "Keep this under 1000 characters.";
   return e;
 }
 
@@ -35,11 +37,11 @@ export function RegisterForm({ event, aside }: { event: ClubEvent; aside?: React
   const [done, setDone] = useState<{ emailed: boolean } | null>(null);
 
   const id = (f: Field) => `${uid}-${f}`;
-  const onChange = (f: Field) => (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const setField = (f: Field, value: string) => {
     setValues((v) => ({ ...v, [f]: value }));
     if (errors[f]) setErrors((er) => ({ ...er, [f]: undefined }));
   };
+  const onChange = (f: Field) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setField(f, e.target.value);
   const focus = (f: Field) => formRef.current?.querySelector<HTMLElement>(`[name="${f}"]`)?.focus();
 
   const submit = async (e: FormEvent) => {
@@ -58,8 +60,8 @@ export function RegisterForm({ event, aside }: { event: ClubEvent; aside?: React
     const body: RegistrationInput = {
       name: values.name.trim(),
       email: values.email.trim(),
-      phone: values.phone.trim(),
-      course: values.course.trim(),
+      ...studentPayload(values),
+      expectations: values.expectations.trim(),
       website,
     };
     try {
@@ -152,19 +154,13 @@ export function RegisterForm({ event, aside }: { event: ClubEvent; aside?: React
           <input type="email" autoComplete="email" inputMode="email" maxLength={200} required {...props("email")} />
           {err("email")}
         </div>
-        <div>
-          <label htmlFor={id("phone")} className="mb-2 block text-[15px] font-medium">
-            Phone <span className="ml-1 font-normal text-dim">Optional</span>
+        <StudentFields uid={uid} values={values} errors={errors} onChange={setField} disabled={busy} inputCls={inputCls} />
+        <div className="sm:col-span-2">
+          <label htmlFor={id("expectations")} className="mb-2 block text-[15px] font-medium">
+            Minimum expectations <span className="ml-1 font-normal text-dim">Optional</span>
           </label>
-          <input type="tel" autoComplete="tel" inputMode="tel" maxLength={20} {...props("phone")} />
-          {err("phone")}
-        </div>
-        <div>
-          <label htmlFor={id("course")} className="mb-2 block text-[15px] font-medium">
-            Year / branch <span className="ml-1 font-normal text-dim">Optional</span>
-          </label>
-          <input type="text" maxLength={120} placeholder="B.Tech 2nd year, CSE" {...props("course")} />
-          {err("course")}
+          <textarea rows={3} maxLength={1000} placeholder="What do you want to get out of this session at the very least?" {...props("expectations")} />
+          {err("expectations")}
         </div>
       </div>
       {/* Honeypot */}

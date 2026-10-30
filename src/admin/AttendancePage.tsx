@@ -125,7 +125,10 @@ type Filter = "all" | "present" | "absent" | "walkin";
 
 const byName = (a: Registration, b: Registration) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
 
-const blankWalkIn = { name: "", email: "", phone: "", course: "" };
+const blankWalkIn = { name: "", email: "", phone: "", course: "", rollNo: "" };
+
+/** "Roll no · Department · Year 2", falling back to the old free-text year / branch. */
+const studentLine = (r: Registration) => [r.rollNo, r.department, r.year ? `Year ${r.year}` : r.course].filter(Boolean).join(" · ");
 
 function sendSummary(r: CertificateSendResult) {
   const parts: string[] = [];
@@ -181,7 +184,7 @@ function EventAttendance() {
       if (filter === "present" && !i.attended) return false;
       if (filter === "absent" && i.attended) return false;
       if (filter === "walkin" && i.source !== "walk_in") return false;
-      return !s || `${i.name} ${i.email} ${i.phone} ${i.code}`.toLowerCase().includes(s);
+      return !s || `${i.name} ${i.email} ${i.phone} ${i.rollNo} ${i.department} ${i.code}`.toLowerCase().includes(s);
     });
   }, [items, q, filter]);
 
@@ -449,7 +452,7 @@ function EventAttendance() {
             id="attendance-search"
             type="search"
             className="field max-w-sm text-[16px]"
-            placeholder="Search name, email, phone or ID…"
+            placeholder="Search name, email, roll no, phone or ID…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -483,7 +486,7 @@ function EventAttendance() {
                   <th scope="col" className="px-4 py-3 font-medium">Check-in</th>
                   <th scope="col" className="px-4 py-3 font-medium">Name</th>
                   <th scope="col" className="px-4 py-3 font-medium">Contact</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Year / branch</th>
+                  <th scope="col" className="px-4 py-3 font-medium">Student</th>
                   <th scope="col" className="px-4 py-3 font-medium">Status</th>
                   <th scope="col" className="px-2 py-3"><span className="sr-only">Actions</span></th>
                 </tr>
@@ -504,7 +507,14 @@ function EventAttendance() {
                       )}
                       {r.phone && <div className="text-muted">{r.phone}</div>}
                     </td>
-                    <td className="px-4 py-2.5 text-muted">{r.course}</td>
+                    <td className="max-w-[260px] px-4 py-2.5 text-muted">
+                      {studentLine(r) || "-"}
+                      {r.expectations && (
+                        <p className="mt-0.5 line-clamp-2 text-[12px] text-dim" title={r.expectations}>
+                          Expects: {r.expectations}
+                        </p>
+                      )}
+                    </td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5">{statusBadges(r)}</div>
                     </td>
@@ -524,7 +534,8 @@ function EventAttendance() {
                   <div className="min-w-0 flex-1 text-[14px]">
                     <p className="text-[16px] font-medium text-fg">{r.name}</p>
                     {r.email && <p className="truncate text-muted">{r.email}</p>}
-                    {(r.phone || r.course) && <p className="text-muted">{[r.phone, r.course].filter(Boolean).join(" · ")}</p>}
+                    {(r.phone || studentLine(r)) && <p className="text-muted">{[r.phone, studentLine(r)].filter(Boolean).join(" · ")}</p>}
+                    {r.expectations && <p className="mt-0.5 line-clamp-2 text-[12px] text-dim">Expects: {r.expectations}</p>}
                   </div>
                   {checkIn(r)}
                 </div>
@@ -617,6 +628,7 @@ function WalkInForm({
         email: form.email.trim(),
         phone: form.phone.trim(),
         course: form.course.trim(),
+        rollNo: form.rollNo.trim(),
         attended: true,
       });
       onAdded(res.item);
@@ -665,13 +677,23 @@ function WalkInForm({
             optional
           />
           <TextField
-            label="Phone"
+            label="WhatsApp"
             name="phone"
             type="tel"
             inputMode="tel"
             value={form.phone}
             onChange={set("phone")}
             error={errors.phone || undefined}
+            autoComplete="off"
+            className="text-[16px]"
+            optional
+          />
+          <TextField
+            label="Roll / enrolment no."
+            name="rollNo"
+            value={form.rollNo}
+            onChange={set("rollNo")}
+            error={errors.rollNo || undefined}
             autoComplete="off"
             className="text-[16px]"
             optional

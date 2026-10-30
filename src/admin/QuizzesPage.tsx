@@ -5,6 +5,7 @@ import { cx, fmtDate } from "@/lib/format";
 import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Plus, Trash } from "@/components/icons";
 import { adminApi, errorMessage } from "./adminApi";
 import { useAdminData } from "./hooks";
+import { QrButton } from "./QrButton";
 import { toast } from "./toast";
 import {
   Badge,
@@ -174,9 +175,12 @@ function Editor({ data, onSaved, reloadAttempts }: { data: Data; onSaved: (q: Qu
         subtitle={`${fmtDate(data.event.startsAt)} · quiz`}
         actions={
           data.quiz?.open && (
-            <a href={`/events/${data.event.slug}/quiz`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-              Open quiz <ArrowUpRight size={15} />
-            </a>
+            <>
+              <a href={`/events/${data.event.slug}/quiz`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                Open quiz <ArrowUpRight size={15} />
+              </a>
+              <QrButton path={`/events/${data.event.slug}/quiz`} title={`Quiz QR: ${data.event.title}`} fileName={`${data.event.slug}-quiz`} />
+            </>
           )
         }
       />

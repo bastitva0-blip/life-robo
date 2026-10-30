@@ -185,8 +185,12 @@ export interface Signup {
   id: number;
   name: string;
   email: string;
-  phone: string;
-  course: string; // year / branch
+  phone: string; // WhatsApp number
+  course: string; // year / branch, older sign-ups only
+  rollNo: string;
+  department: string;
+  year: number; // 1-5, 0 when unknown
+  team: string; // team they want to join
   interests: string;
   createdAt: ISODate;
 }
@@ -215,8 +219,12 @@ export interface Registration {
   eventId: number;
   name: string;
   email: string;
-  phone: string;
-  course: string;
+  phone: string; // WhatsApp number
+  course: string; // year / branch, older registrations and walk-ins
+  rollNo: string;
+  department: string;
+  year: number; // 1-5, 0 when unknown
+  expectations: string;
   source: RegistrationSource;
   attended: boolean;
   attendedAt: ISODate | null;
@@ -230,8 +238,11 @@ export interface Registration {
 export interface RegistrationInput {
   name: string;
   email: string;
-  phone?: string;
-  course?: string;
+  phone: string; // WhatsApp
+  rollNo: string;
+  department: string;
+  year: number;
+  expectations?: string;
   website?: string; // honeypot
 }
 
@@ -270,8 +281,11 @@ export interface Certificate {
 export interface SignupInput {
   name: string;
   email: string;
-  phone?: string;
-  course?: string;
+  phone: string; // WhatsApp
+  rollNo: string;
+  department: string;
+  year: number;
+  team: string;
   interests?: string;
   website?: string; // honeypot, must be empty
 }
@@ -414,3 +428,10 @@ export interface AdminRole {
   hasPassword: boolean;
   permissions: AdminSection[];
 }
+
+/* ---------- Student details (join + registration forms) ---------- */
+
+export const DEPARTMENTS = ["CSE", "CSE (AI)", "ECE", "EE", "ME", "CE", "BCA", "MCA", "Other"] as const;
+export const STUDY_YEARS = [1, 2, 3, 4, 5] as const;
+/** Team groups on the Team page that aren't open for joining. */
+export const NON_JOINABLE_GROUPS = ["Faculty", "Executive Board"];

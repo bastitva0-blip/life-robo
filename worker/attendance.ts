@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AttendanceEvent, Certificate, CertificateSendResult, MailStatus, Registration } from "@shared/types";
 import type { AppEnv } from "./env";
 import { hashIp } from "./auth";
+import { studentFields } from "./student";
 import { BATCH_MAX, certificateMail, confirmationMail, mailConfigured, mailQuota, sendBatch, sendMail } from "./mail";
 
 // Event registration (public), attendance and certificates (admin).
@@ -35,6 +36,10 @@ const toReg = (r: Row): Registration => ({
   email: String(r.email ?? ""),
   phone: String(r.phone ?? ""),
   course: String(r.course ?? ""),
+  rollNo: String(r.roll_no ?? ""),
+  department: String(r.department ?? ""),
+  year: Number(r.year ?? 0),
+  expectations: String(r.expectations ?? ""),
   source: r.source === "walk_in" ? "walk_in" : "online",
   attended: r.attended === 1,
   attendedAt: (r.attended_at as string | null) ?? null,
@@ -87,8 +92,8 @@ const phone = phoneBase.default("");
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
   email: z.email("Please enter a valid email").max(200),
-  phone,
-  course: z.string().trim().max(120).default(""),
+  ...studentFields,
+  expectations: z.string().trim().max(1000).default(""),
   website: z.string().max(200).optional(),
 });
 
@@ -120,9 +125,9 @@ attendance.post("/api/events/:slug/register", async (c) => {
     try {
       row = await db
         .prepare(
-          "INSERT INTO registrations (event_id, name, email, phone, course, source, code, ip_hash) VALUES (?1, ?2, ?3, ?4, ?5, 'online', ?6, ?7) RETURNING *",
+          "INSERT INTO registrations (event_id, name, email, phone, roll_no, department, year, expectations, source, code, ip_hash) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 'online', ?9, ?10) RETURNING *",
         )
-        .bind(ev.id, data.name, email, data.phone, data.course, newCode(), ip)
+        .bind(ev.id, data.name, email, data.phone, data.rollNo, data.department, data.year, data.expectations, newCode(), ip)
         .first<Row>();
     } catch (err) {
       if (!isUniqueError(err)) throw err;
@@ -218,6 +223,7 @@ const walkInSchema = z.object({
   email: optionalEmail,
   phone,
   course: z.string().trim().max(120).default(""),
+  rollNo: z.string().trim().max(40).default(""),
   attended: z.boolean().default(true),
 });
 
@@ -249,10 +255,10 @@ attendance.post("/api/admin/attendance/:eventId", async (c) => {
     try {
       const row = await db
         .prepare(
-          `INSERT INTO registrations (event_id, name, email, phone, course, source, attended, attended_at, code)
-           VALUES (?1, ?2, ?3, ?4, ?5, 'walk_in', ?6, ?7, ?8) RETURNING *`,
+          `INSERT INTO registrations (event_id, name, email, phone, course, roll_no, source, attended, attended_at, code)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'walk_in', ?7, ?8, ?9) RETURNING *`,
         )
-        .bind(id, d.name, email, d.phone, d.course, d.attended ? 1 : 0, d.attended ? now() : null, newCode())
+        .bind(id, d.name, email, d.phone, d.course, d.rollNo, d.attended ? 1 : 0, d.attended ? now() : null, newCode())
         .first<Row>();
       return c.json({ item: toReg(row!), existing: false }, 201);
     } catch (err) {
@@ -274,7 +280,7 @@ attendance.get("/api/admin/attendance/:eventId/export.csv", async (c) => {
   const cell = (v: string) => `"${(/^[=+\-@\t\r]/.test(v) ? `'${v}` : v).replace(/"/g, '""')}"`;
   const o = origin(c);
   const lines = [
-    ["Name", "Email", "Phone", "Year / branch", "Source", "Present", "Checked in", "Registered", "Certificate sent", "Certificate link"]
+    ["Name", "Email", "WhatsApp", "Roll no", "Department", "Year", "Year / branch", "Minimum expectations", "Source", "Present", "Checked in", "Registered", "Certificate sent", "Certificate link"]
       .map(cell)
       .join(","),
   ];
@@ -284,7 +290,11 @@ attendance.get("/api/admin/attendance/:eventId/export.csv", async (c) => {
         r.name,
         r.email,
         r.phone,
+        r.rollNo,
+        r.department,
+        r.year ? String(r.year) : "",
         r.course,
+        r.expectations,
         r.source === "walk_in" ? "Walk-in" : "Online",
         r.attended ? "Yes" : "No",
         r.attendedAt ?? "",
@@ -373,6 +383,7 @@ const updateSchema = z.object({
   email: emailOrEmpty.optional(),
   phone: phoneBase.optional(),
   course: z.string().trim().max(120).optional(),
+  rollNo: z.string().trim().max(40).optional(),
   attended: z.boolean().optional(),
 });
 
@@ -392,6 +403,7 @@ attendance.put("/api/admin/registrations/:id", async (c) => {
   if (d.email !== undefined) add("email", d.email.toLowerCase());
   if (d.phone !== undefined) add("phone", d.phone);
   if (d.course !== undefined) add("course", d.course);
+  if (d.rollNo !== undefined) add("roll_no", d.rollNo);
   if (d.attended !== undefined) {
     add("attended", d.attended ? 1 : 0);
     add("attended_at", d.attended ? now() : null);

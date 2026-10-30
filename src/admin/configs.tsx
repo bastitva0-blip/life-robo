@@ -75,6 +75,7 @@ export const eventsConfig: CollectionConfig<ClubEvent> = {
     return e;
   },
   viewUrl: (d) => (d.published ? `/events/${d.slug}` : null),
+  qr: true,
   Form: EventForm,
   emptyBody: "Create your first event. It'll appear on the Events page and, if upcoming, on the home page.",
 };

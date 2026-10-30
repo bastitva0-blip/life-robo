@@ -8,6 +8,9 @@ import { toast } from "./toast";
 import { ConfirmDialog, Empty, IconButton, LoadError, PageHeader, SkeletonRows } from "./ui";
 import { countSince } from "./utils";
 
+/** "Roll no · Department · Year 2", falling back to the old free-text year / branch. */
+const studentLine = (s: Signup) => [s.rollNo, s.department, s.year ? `Year ${s.year}` : s.course].filter(Boolean).join(" · ");
+
 export default function SignupsPage() {
   const { data, error, loading, reload, mutate } = useAdminData<{ items: Signup[] }>("/api/admin/signups");
   const [q, setQ] = useState("");
@@ -17,7 +20,7 @@ export default function SignupsPage() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return items;
-    return items.filter((i) => `${i.name} ${i.email} ${i.phone} ${i.course} ${i.interests}`.toLowerCase().includes(s));
+    return items.filter((i) => `${i.name} ${i.email} ${i.phone} ${i.rollNo} ${i.department} ${i.team} ${i.course} ${i.interests}`.toLowerCase().includes(s));
   }, [items, q]);
 
   const recent = countSince(items, 7);
@@ -57,7 +60,7 @@ export default function SignupsPage() {
             id="signup-search"
             type="search"
             className="field max-w-sm"
-            placeholder="Search name, email, course…"
+            placeholder="Search name, roll no, department, team…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -87,8 +90,8 @@ export default function SignupsPage() {
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">Name</th>
                   <th scope="col" className="px-4 py-3 font-medium">Contact</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Course</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Interests</th>
+                  <th scope="col" className="px-4 py-3 font-medium">Student</th>
+                  <th scope="col" className="px-4 py-3 font-medium">Team / interests</th>
                   <th scope="col" className="px-4 py-3 font-medium">Date</th>
                   <th scope="col" className="px-2 py-3"><span className="sr-only">Actions</span></th>
                 </tr>
@@ -101,8 +104,11 @@ export default function SignupsPage() {
                       <a href={`mailto:${s.email}`} className="text-accent hover:underline">{s.email}</a>
                       {s.phone && <div className="text-muted">{s.phone}</div>}
                     </td>
-                    <td className="px-4 py-3 text-muted">{s.course || "-"}</td>
-                    <td className="max-w-[260px] px-4 py-3 text-muted"><p className="line-clamp-3 whitespace-pre-line">{s.interests || "-"}</p></td>
+                    <td className="px-4 py-3 text-muted">{studentLine(s) || "-"}</td>
+                    <td className="max-w-[260px] px-4 py-3 text-muted">
+                      {s.team && <p className="font-medium text-fg">{s.team}</p>}
+                      <p className="line-clamp-3 whitespace-pre-line">{s.interests || (s.team ? "" : "-")}</p>
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted">
                       {fmtDate(s.createdAt)}
                       <div className="text-[12px] text-dim">{fmtTime(s.createdAt)}</div>
@@ -124,7 +130,8 @@ export default function SignupsPage() {
                 <div className="min-w-0 flex-1 text-[14px]">
                   <p className="font-medium text-fg">{s.name}</p>
                   <a href={`mailto:${s.email}`} className="block truncate text-accent">{s.email}</a>
-                  <p className="text-muted">{[s.phone, s.course].filter(Boolean).join(" · ")}</p>
+                  <p className="text-muted">{[s.phone, studentLine(s)].filter(Boolean).join(" · ")}</p>
+                  {s.team && <p className="text-fg">{s.team}</p>}
                   {s.interests && <p className="mt-1 line-clamp-2 text-dim">{s.interests}</p>}
                   <p className="mt-1 text-[12px] text-dim">{fmtDate(s.createdAt)} · {fmtTime(s.createdAt)}</p>
                 </div>

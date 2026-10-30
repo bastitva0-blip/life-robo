@@ -4,6 +4,7 @@ import type { AdminTable, Editable } from "@shared/types";
 import { cx } from "@/lib/format";
 import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronUp, Grip, Plus } from "@/components/icons";
 import { ApiError, adminApi, errorMessage, fieldErrors, tablePath } from "./adminApi";
+import { QrButton } from "./QrButton";
 import { useAdminData } from "./hooks";
 import { toast } from "./toast";
 import {
@@ -46,6 +47,8 @@ export interface CollectionConfig<T extends Base> {
   quickToggle?: { key: keyof Editable<T> & string; label: string };
   validate?: (d: Editable<T>) => Record<string, string>;
   viewUrl?: (d: Editable<T>) => string | null;
+  /** Show a QR code for the public page next to "View on site". */
+  qr?: boolean;
   Form: ComponentType<FormProps<T>>;
   ListTop?: ComponentType<{ items: T[]; reload: () => void }>;
   emptyBody?: ReactNode;
@@ -385,6 +388,7 @@ function CollectionEditor<T extends Base>({ config, item }: { config: Collection
                 View on site <ArrowUpRight size={15} />
               </a>
             )}
+            {viewUrl && config.qr && <QrButton path={viewUrl} title={`QR code: ${label}`} fileName={viewUrl.split("/").pop() || config.singular} />}
             {!isNew && (
               <button type="button" className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(true)}>
                 Delete

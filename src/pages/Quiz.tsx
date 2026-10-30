@@ -7,6 +7,7 @@ import { usePageMeta } from "@/lib/seo";
 import { cx } from "@/lib/format";
 import { ArrowRight, Check, Close } from "@/components/icons";
 import { ErrorState, Skeleton } from "@/components/ui";
+import { ShareButton } from "@/components/ShareButton";
 import NotFound from "./NotFound";
 import { BackLink, DetailShell, is404 } from "./_shared";
 
@@ -39,6 +40,17 @@ export default function QuizPage() {
         )}
       </div>
     </DetailShell>
+  );
+}
+
+function ShareQuiz({ quiz, slug }: { quiz: PublicQuiz; slug: string }) {
+  return (
+    <ShareButton
+      title={quiz.title}
+      text={`${quiz.title}\nAttended ${quiz.event.title}? Take the quiz and get your badge.`}
+      url={`${window.location.origin}/events/${slug}/quiz`}
+      className="btn-sm"
+    />
   );
 }
 
@@ -87,16 +99,19 @@ function QuizForm({ quiz, slug }: { quiz: PublicQuiz; slug: string }) {
     }
   };
 
-  if (result) return <Result quiz={quiz} answers={answers} result={result} />;
+  if (result) return <Result quiz={quiz} answers={answers} result={result} slug={slug} />;
 
   return (
     <form ref={formRef} onSubmit={submit} noValidate aria-busy={busy}>
       <p className="eyebrow mb-4">{quiz.event.title}</p>
       <h1 className="headline">{quiz.title}</h1>
       {quiz.intro && <p className="mt-6 whitespace-pre-line text-lg text-fg/90">{quiz.intro}</p>}
-      <p className="mt-4 text-[15px] text-dim">
-        {quiz.questions.length} questions · one attempt per email · score {quiz.passPercent}% or more to pass
-      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[15px] text-dim">
+          {quiz.questions.length} questions · one attempt per email · score {quiz.passPercent}% or more to pass
+        </p>
+        <ShareQuiz quiz={quiz} slug={slug} />
+      </div>
 
       <div className="card mt-10 grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
         <div>
@@ -202,7 +217,7 @@ function QuizForm({ quiz, slug }: { quiz: PublicQuiz; slug: string }) {
   );
 }
 
-function Result({ quiz, answers, result }: { quiz: PublicQuiz; answers: number[]; result: QuizResult }) {
+function Result({ quiz, answers, result, slug }: { quiz: PublicQuiz; answers: number[]; result: QuizResult; slug: string }) {
   const pct = Math.round((result.score / Math.max(1, result.total)) * 100);
   return (
     <div>
@@ -223,9 +238,12 @@ function Result({ quiz, answers, result }: { quiz: PublicQuiz; answers: number[]
           <p className="mt-2 text-[15px] text-muted">
             Your badge is ready. Download it and share it. Badge ID <span className="font-mono text-fg">{result.code}</span>
           </p>
-          <Link to={`/badges/${result.code}`} className="btn btn-primary mt-5">
-            Get your badge <ArrowRight size={18} />
-          </Link>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link to={`/badges/${result.code}`} className="btn btn-primary">
+              Get your badge <ArrowRight size={18} />
+            </Link>
+            <ShareQuiz quiz={quiz} slug={slug} />
+          </div>
         </div>
       </div>
 

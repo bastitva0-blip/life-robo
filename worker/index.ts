@@ -5,6 +5,7 @@ import type { AppEnv } from "./env";
 import { attendance } from "./attendance";
 import { quizzes } from "./quizzes";
 import { roles } from "./roles";
+import { studentFields } from "./student";
 import { clearSession, findRoleByPassword, hashIp, issueSession, requireAdmin, sameOrigin } from "./auth";
 import {
   getEvent,
@@ -117,13 +118,8 @@ app.get("/api/posts/:slug", async (c) => {
 const signupSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
   email: z.email("Please enter a valid email").max(200),
-  phone: z
-    .string()
-    .trim()
-    .max(20)
-    .regex(/^[0-9+\-\s()]*$/, "Digits only")
-    .default(""),
-  course: z.string().trim().max(120).default(""),
+  ...studentFields,
+  team: z.string().trim().min(1, "Please pick a team").max(80),
   interests: z.string().trim().max(1500).default(""),
   website: z.string().max(200).optional(),
 });
@@ -145,8 +141,10 @@ app.post("/api/signup", async (c) => {
     .first<{ n: number }>();
   if ((recent?.n ?? 0) >= 5) return c.json({ error: "Too many sign-ups from this network. Try again later." }, 429);
 
-  await c.env.DB.prepare("INSERT INTO signups (name, email, phone, course, interests, ip_hash) VALUES (?1, ?2, ?3, ?4, ?5, ?6)")
-    .bind(data.name, data.email.toLowerCase(), data.phone, data.course, data.interests, ip)
+  await c.env.DB.prepare(
+    "INSERT INTO signups (name, email, phone, roll_no, department, year, team, interests, ip_hash) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+  )
+    .bind(data.name, data.email.toLowerCase(), data.phone, data.rollNo, data.department, data.year, data.team, data.interests, ip)
     .run();
   return c.json({ ok: true }, 201);
 });
@@ -223,6 +221,10 @@ const signupRow = (r: Record<string, unknown>): Signup => ({
   email: String(r.email),
   phone: String(r.phone ?? ""),
   course: String(r.course ?? ""),
+  rollNo: String(r.roll_no ?? ""),
+  department: String(r.department ?? ""),
+  year: Number(r.year ?? 0),
+  team: String(r.team ?? ""),
   interests: String(r.interests ?? ""),
   createdAt: String(r.created_at),
 });
@@ -236,9 +238,11 @@ app.get("/api/admin/signups.csv", async (c) => {
   const { results } = await c.env.DB.prepare("SELECT * FROM signups ORDER BY created_at DESC").all();
   // Quote every cell; prefix formula-like values so spreadsheets don't execute them.
   const cell = (v: string) => `"${(/^[=+\-@\t\r]/.test(v) ? `'${v}` : v).replace(/"/g, '""')}"`;
-  const lines = [["Date", "Name", "Email", "Phone", "Course", "Interests"].map(cell).join(",")];
+  const lines = [["Date", "Name", "Email", "WhatsApp", "Roll no", "Department", "Year", "Team", "Year / branch (old)", "Interests"].map(cell).join(",")];
   for (const s of results.map(signupRow)) {
-    lines.push([s.createdAt, s.name, s.email, s.phone, s.course, s.interests].map(cell).join(","));
+    lines.push(
+      [s.createdAt, s.name, s.email, s.phone, s.rollNo, s.department, s.year ? String(s.year) : "", s.team, s.course, s.interests].map(cell).join(","),
+    );
   }
   return new Response(lines.join("\r\n"), {
     headers: {

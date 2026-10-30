@@ -1,6 +1,6 @@
-import { useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router";
-import type { SignupInput } from "@shared/types";
+import { NON_JOINABLE_GROUPS, type SignupInput } from "@shared/types";
 import { ApiError, api } from "@/lib/api";
 import { useSite } from "@/lib/site";
 import { usePageMeta } from "@/lib/seo";
@@ -8,27 +8,27 @@ import { cx } from "@/lib/format";
 import { Socials } from "@/components/Layout";
 import { ArrowRight, Check } from "@/components/icons";
 import { EmptyState, PageHero, Reveal } from "@/components/ui";
+import { EMPTY_STUDENT, STUDENT_FIELDS, studentPayload, validateStudent, type StudentField, type StudentValues } from "@/lib/student";
+import { StudentFields } from "./_StudentFields";
 
-type Field = "name" | "email" | "phone" | "course" | "interests";
-type Values = Record<Field, string>;
+type Field = "name" | "email" | "team" | "interests" | StudentField;
+type Values = StudentValues & { name: string; email: string; team: string; interests: string };
 type Errors = Partial<Record<Field, string>>;
 type Status = "idle" | "submitting" | "success";
 
-const EMPTY: Values = { name: "", email: "", phone: "", course: "", interests: "" };
-const FIELDS: Field[] = ["name", "email", "phone", "course", "interests"];
+const EMPTY: Values = { name: "", email: "", team: "", interests: "", ...EMPTY_STUDENT };
+const FIELDS: Field[] = ["name", "email", ...STUDENT_FIELDS, "team", "interests"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function validate(v: Values): Errors {
-  const e: Errors = {};
+  const e: Errors = validateStudent(v);
   const name = v.name.trim();
   if (name.length < 2) e.name = "Please enter your name.";
   else if (name.length > 120) e.name = "Name is too long.";
   const email = v.email.trim();
   if (!email) e.email = "Please enter your email.";
   else if (!EMAIL_RE.test(email) || email.length > 200) e.email = "Please enter a valid email address.";
-  if (v.phone && !/^[0-9+\-\s()]*$/.test(v.phone)) e.phone = "Use digits, spaces, +, - or brackets only.";
-  else if (v.phone.trim().length > 20) e.phone = "Phone number is too long.";
-  if (v.course.trim().length > 120) e.course = "Keep this under 120 characters.";
+  if (!v.team) e.team = "Please pick the team you'd like to join.";
   if (v.interests.trim().length > 1500) e.interests = "Keep this under 1500 characters.";
   return e;
 }
@@ -108,7 +108,12 @@ function Success({ name }: { name: string }) {
 }
 
 export default function Join() {
-  const { settings } = useSite();
+  const { settings, data } = useSite();
+  // Teams come from the Team page groups, so a new team shows up here automatically.
+  const teams = useMemo(() => {
+    const groups = (data?.team ?? []).map((m) => m.group.trim()).filter((g) => g && !NON_JOINABLE_GROUPS.includes(g));
+    return [...new Set(groups)];
+  }, [data]);
   usePageMeta(settings.joinHeading || "Join", settings.joinBody || "Sign up to join Life Robo, the robotics club at FoET, University of Lucknow.");
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
@@ -122,11 +127,11 @@ export default function Join() {
   const id = (f: Field) => `${uid}-${f}`;
   const focusField = (f: Field) => formRef.current?.querySelector<HTMLElement>(`[name="${f}"]`)?.focus();
 
-  const onChange = (f: Field) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = e.target.value;
+  const setField = (f: Field, value: string) => {
     setValues((v) => ({ ...v, [f]: value }));
     if (errors[f]) setErrors((er) => ({ ...er, [f]: undefined }));
   };
+  const onChange = (f: Field) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setField(f, e.target.value);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -145,8 +150,8 @@ export default function Join() {
     const body: SignupInput = {
       name: values.name.trim(),
       email: values.email.trim(),
-      phone: values.phone.trim(),
-      course: values.course.trim(),
+      ...studentPayload(values),
+      team: values.team,
       interests: values.interests.trim(),
       website,
     };
@@ -226,12 +231,22 @@ export default function Join() {
                   <FormField id={id("email")} label="Email" error={errors.email}>
                     <input type="email" autoComplete="email" inputMode="email" required maxLength={200} {...fieldProps("email")} />
                   </FormField>
-                  <FormField id={id("phone")} label="Phone" optional error={errors.phone}>
-                    <input type="tel" autoComplete="tel" inputMode="tel" maxLength={20} {...fieldProps("phone")} />
-                  </FormField>
-                  <FormField id={id("course")} label="Year / branch" optional hint="e.g. B.Tech 2nd year, CSE" error={errors.course}>
-                    <input type="text" maxLength={120} {...fieldProps("course", true)} />
-                  </FormField>
+                  <StudentFields uid={uid} values={values} errors={errors} onChange={setField} disabled={submitting} inputCls={inputCls} />
+                  <div className="sm:col-span-2">
+                    <FormField id={id("team")} label="Team you're interested in" error={errors.team}>
+                      <select {...fieldProps("team")} className={cx(fieldProps("team").className, "appearance-auto")}>
+                        <option value="" disabled>
+                          Select a team
+                        </option>
+                        {teams.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                        <option value="Not sure yet">Not sure yet</option>
+                      </select>
+                    </FormField>
+                  </div>
                 </div>
                 <FormField
                   id={id("interests")}
